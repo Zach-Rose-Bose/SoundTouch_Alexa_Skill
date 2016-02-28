@@ -7,6 +7,10 @@
  * http://amzn.to/1LGWsLG
  */
 var http = require('http');
+
+////////// CONFIG //////////
+var bridgeBasePath = "http://alexabridge.zwrose.com";
+var bridgeID = 1;
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -155,8 +159,10 @@ function SkipBackIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Skipping back in the " + speaker + ".";
                     shouldEndSession = true;
-                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track');
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track', function(res) {
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track';
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -194,8 +200,11 @@ function SkipBackIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Skipping back.";
                 shouldEndSession = true;
-                console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track');
-                http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track', function(res) {
+                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track';
+
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
                     res.resume();
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -239,8 +248,10 @@ function SkipForwardIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Skipping forward in the " + speaker + ".";
                     shouldEndSession = true;
-                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track');
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track', function(res) {
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track';    
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -278,8 +289,10 @@ function SkipForwardIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Skipping forward.";
                 shouldEndSession = true;
-                console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/next_track');
-                http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/next_track', function(res) {
+                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/next_track';    
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
                     res.resume();
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -344,51 +357,41 @@ function VolumeChangeIntent(intent, session, callback) {
                             // turn it up
                             speechOutput = "Turning up the " + userHomeState.speakers[speaker].name + ".";
                             shouldEndSession = true;
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume', function(res) {
-                                var zoneBody = '';
-                                res.on('data', function(chunk) {zoneBody += chunk;});
-                                res.on('end', function() {
-                                    var currentVolume = JSON.parse(zoneBody).volume.actualvolume;
-                                    var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
-                                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp);
-                                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp, function(res) {
-                                        res.resume();
-                                        res.on('end', function(){
-                                            console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-                                            
-                                        });
-                                    });
-        
+                            var currentVolume = userHomeState.speakers[speaker].currentVolume;
+                            var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp;
+
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
+                                res.resume();
+                                res.on('end', function(){
+                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
+                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
                                 });
-                            }).on('error', function(e) {
-                                console.log("Got error: " + e.message);
                             });
+                        
                             
                         } else {
                             // turn it down
                             speechOutput = "Turning down the " + userHomeState.speakers[speaker].name + ".";
                             shouldEndSession = true;
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume', function(res) {
-                                var zoneBody = '';
-                                res.on('data', function(chunk) {zoneBody += chunk;});
-                                res.on('end', function() {
-                                    var currentVolume = JSON.parse(zoneBody).volume.actualvolume;
-                                    var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
-                                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown);
-                                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown, function(res) {
-                                        res.resume();
-                                        res.on('end', function(){
-                                            console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-                                            
-                                        });
-                                    });
-        
+                            var currentVolume = userHomeState.speakers[speaker].currentVolume;
+                            var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown;
+
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
+                                res.resume();
+                                res.on('end', function(){
+                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
+                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
                                 });
-                            }).on('error', function(e) {
-                                console.log("Got error: " + e.message);
                             });
+
                         }
                     
                 } else {
@@ -417,50 +420,38 @@ function VolumeChangeIntent(intent, session, callback) {
                             // turn it up
                             speechOutput = "Turning up the " + userHomeState.speakers[userHomeState.zonesPlaying[0]] + ".";
                             shouldEndSession = true;
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume', function(res) {
-                                var zoneBody = '';
-                                res.on('data', function(chunk) {zoneBody += chunk;});
-                                res.on('end', function() {
-                                    var currentVolume = JSON.parse(zoneBody).volume.actualvolume;
-                                    var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
-                                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeUp);
-                                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeUp, function(res) {
-                                        res.resume();
-                                        res.on('end', function(){
-                                            console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-                                            
-                                        });
-                                    });
-        
+                            var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
+                            var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeUp;
+
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
+                                res.resume();
+                                res.on('end', function(){
+                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
+                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
                                 });
-                            }).on('error', function(e) {
-                                console.log("Got error: " + e.message);
                             });
                             
                         } else {
                             // turn it down
                             peechOutput = "Turning down the " + userHomeState.speakers[userHomeState.zonesPlaying[0]] + ".";
                             shouldEndSession = true;
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume', function(res) {
-                                var zoneBody = '';
-                                res.on('data', function(chunk) {zoneBody += chunk;});
-                                res.on('end', function() {
-                                    var currentVolume = JSON.parse(zoneBody).volume.actualvolume;
-                                    var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
-                                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeDown);
-                                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeDown, function(res) {
-                                        res.resume();
-                                        res.on('end', function(){
-                                            console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                            callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-                                            
-                                        });
-                                    });
-        
+                            var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
+                            var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeDown;
+
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
+                                res.resume();
+                                res.on('end', function(){
+                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
+                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
                                 });
-                            }).on('error', function(e) {
-                                console.log("Got error: " + e.message);
                             });
                         }
                         
@@ -515,8 +506,11 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
                     
                     speechOutput = "Queueing up the jams on your " + speaker + " speaker. Enjoy!";
                     shouldEndSession = true;
-                    console.log('[ INFO ] URI sent: http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/PRESET_' + encodeURIComponent(presetSlot.value));
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/PRESET_' + encodeURIComponent(presetSlot.value), function(res) {
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/PRESET_' + encodeURIComponent(presetSlot.value);
+                    
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -603,8 +597,11 @@ function ZonesIntent(intent, session, callback) {
                             // is a master, so need to just add slave
                             speechOutput = "Adding " + slave + " to your " + master + " group.";
                             shouldEndSession = true;
-                            console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/addZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name));
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/addZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name), function(res) {
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[master].name) + '/addZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
+                            
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
                                 res.resume();
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -618,8 +615,11 @@ function ZonesIntent(intent, session, callback) {
                             // not a master, so need to make zone
                             speechOutput = "Adding " + slave + " to your " + master + ", forming " + master + " group.";
                             shouldEndSession = true;
-                            console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/setZone/' + encodeURIComponent(userHomeState.speakers[slave].name));
-                            http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/setZone/' + encodeURIComponent(userHomeState.speakers[slave].name), function(res) {
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            + encodeURIComponent(userHomeState.speakers[master].name) + '/setZone/' + encodeURIComponent(userHomeState.speakers[slave].name);
+                            
+                            console.log(commandURI);
+                            http.get(commandURI, function(res) {
                                 res.resume();
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -634,8 +634,11 @@ function ZonesIntent(intent, session, callback) {
                         
                         speechOutput = "Removing " + slave + " from your " + master + " group.";
                         shouldEndSession = true;
-                        console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/removeZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name));
-                        http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[master].name) + '/removeZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name), function(res) {
+                        var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                        + encodeURIComponent(userHomeState.speakers[master].name) + '/removeZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
+                        
+                        console.log(commandURI);
+                        http.get(commandURI, function(res) {
                             res.resume();
                             res.on('end', function(){
                                 console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -696,8 +699,11 @@ function PauseIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Pausing the " + speaker + ".";
                     shouldEndSession = true;
-                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/pause');
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/pause', function(res) {
+                     var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/pause';
+                    
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -733,8 +739,11 @@ function PauseIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Pausing.";
                 shouldEndSession = true;
-                console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/pause');
-                http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/pause', function(res) {
+                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/pause';
+                
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
                     res.resume();
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -777,8 +786,11 @@ function PlayIntent(intent, session, callback) {
                     // is paused
                     speechOutput = "Playing the " + speaker + ".";
                     shouldEndSession = true;
-                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/play');
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/play', function(res) {
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/play';
+                    
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -798,8 +810,11 @@ function PlayIntent(intent, session, callback) {
                     // is off
                     speechOutput = "Powering up and playing the " + speaker + ".";
                     shouldEndSession = true;
-                    console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOn');
-                    http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOn', function(res) {
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOn';
+                    
+                    console.log(commandURI);
+                    http.get(commandURI, function(res) {
                         res.resume();
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -832,8 +847,11 @@ function PlayIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE") {
                 speechOutput = "Playing.";
                 shouldEndSession = true;
-                console.log('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/play');
-                http.get('http://st.zwrose.com/' + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/play', function(res) {
+                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/play';
+                
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
                     res.resume();
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
@@ -858,18 +876,13 @@ function PlayIntent(intent, session, callback) {
 // --------------- Helper that gets info about the state of the user's home -----------------------
 
 function getBoseHomeState(boseCallback) {
-    var homeState = {
-        speakers: {},
-        zonesPlaying: []
-    };
-
-    // go get the list of speakers from the server
     http.get('http://alexabridge.zwrose.com/api/homeStates/' + bridgeID, function(res) {
-        var listBody = '';
-        res.on('data', function(chunk) {listBody += chunk;});
-        res.on('end', function() {JSON.parse(listBody).forEach(function(element, index, array) {
+        var homeStateBody = '';
+        res.on('data', function(chunk) {homeStateBody += chunk;});
+        res.on('end', function() {
+            var homeState = JSON.parse(homeStateBody).currentState;
+            boseCallback(homeState);
 
-        });
         });
     }).on('error', function(e) {
         console.log("Got error: " + e.message);
