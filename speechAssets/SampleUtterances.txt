@@ -1,0 +1,107 @@
+PlayPresetToSpeakerIntent play preset {Preset} on {Speaker}
+PlayPresetToSpeakerIntent play preset {Preset} on my {Speaker}
+PlayPresetToSpeakerIntent play preset {Preset} in the {Speaker}
+PlayPresetToSpeakerIntent play preset {Preset} in my {Speaker}
+PlayPresetToSpeakerIntent play station {Preset} on {Speaker}
+PlayPresetToSpeakerIntent play station {Preset} on my {Speaker}
+PlayPresetToSpeakerIntent play station {Preset} in the {Speaker}
+PlayPresetToSpeakerIntent play station {Preset} in my {Speaker}
+PlayPresetToSpeakerIntent play number {Preset} on {Speaker}
+PlayPresetToSpeakerIntent play number {Preset} on my {Speaker}
+PlayPresetToSpeakerIntent play number {Preset} in the {Speaker}
+PlayPresetToSpeakerIntent play number {Preset} in my {Speaker}
+PlayPresetToSpeakerIntent play {Preset} on {Speaker}
+PlayPresetToSpeakerIntent play {Preset} on my {Speaker}
+PlayPresetToSpeakerIntent play {Preset} in the {Speaker}
+PlayPresetToSpeakerIntent play {Preset} in my {Speaker}
+
+ZonesIntent {Action} the {Slave} to the {Master}
+ZonesIntent {Action} the {Slave} to my {Master}
+ZonesIntent {Action} my {Slave} to my {Master}
+ZonesIntent {Action} the {Slave} to the {Master} speaker
+ZonesIntent {Action} the {Slave} to my {Master} speaker
+ZonesIntent {Action} my {Slave} to my {Master} speaker
+ZonesIntent {Action} the {Slave} speaker to the {Master}
+ZonesIntent {Action} the {Slave} speaker to my {Master}
+ZonesIntent {Action} my {Slave} speaker to my {Master}
+ZonesIntent {Action} the {Slave} speaker to the {Master} speaker
+ZonesIntent {Action} the {Slave} speaker to my {Master} speaker
+ZonesIntent {Action} my {Slave} speaker to my {Master} speaker
+ZonesIntent {Action} the {Slave} from the {Master}
+ZonesIntent {Action} the {Slave} from my {Master}
+ZonesIntent {Action} my {Slave} from my {Master}
+ZonesIntent {Action} the {Slave} from the {Master} speaker
+ZonesIntent {Action} the {Slave} from my {Master} speaker
+ZonesIntent {Action} my {Slave} from my {Master} speaker
+ZonesIntent {Action} the {Slave} speaker from the {Master}
+ZonesIntent {Action} the {Slave} speaker from my {Master}
+ZonesIntent {Action} my {Slave} speaker from my {Master}
+ZonesIntent {Action} the {Slave} speaker from the {Master} speaker
+ZonesIntent {Action} the {Slave} speaker from my {Master} speaker
+ZonesIntent {Action} my {Slave} speaker from my {Master} speaker
+
+PauseIntent pause
+PauseIntent pause the music
+PauseIntent pause the {Speaker}
+PauseIntent pause the {Speaker} speaker
+PauseIntent pause my {Speaker}
+PauseIntent pause my {Speaker} speaker
+
+PlayIntent play
+PlayIntent play the music
+PlayIntent play the {Speaker}
+PlayIntent play the {Speaker} speaker
+PlayIntent play my {Speaker}
+PlayIntent play my {Speaker} speaker
+PlayIntent resume
+PlayIntent resume the music
+PlayIntent resume the {Speaker}
+PlayIntent resume the {Speaker} speaker
+PlayIntent resume my {Speaker}
+PlayIntent resume my {Speaker} speaker
+
+VolumeChangeIntent turn it {VolumeChange}
+VolumeChangeIntent turn {Speaker} {VolumeChange}
+VolumeChangeIntent turn {VolumeChange} {Speaker}
+VolumeChangeIntent turn the {Speaker} {VolumeChange}
+VolumeChangeIntent turn {VolumeChange} the {Speaker}
+VolumeChangeIntent make it {VolumeChange}
+VolumeChangeIntent make {Speaker} {VolumeChange}
+VolumeChangeIntent make the {Speaker} {VolumeChange}
+VolumeChangeIntent play the {Speaker} {VolumeChange}
+VolumeChangeIntent play {Speaker} {VolumeChange}
+VolumeChangeIntent play {VolumeChange}
+
+SkipForwardIntent next
+SkipForwardIntent next track
+SkipForwardIntent next song
+SkipForwardIntent skip
+SkipForwardIntent skip forward
+SkipForwardIntent next track in the {Speaker}
+SkipForwardIntent next song in the {Speaker}
+SkipForwardIntent skip forward in the {Speaker}
+SkipForwardIntent next track on the {Speaker}
+SkipForwardIntent next song on the {Speaker}
+SkipForwardIntent skip forward on the {Speaker}
+
+SkipBackIntent back
+SkipBackIntent restart
+SkipBackIntent last track
+SkipBackIntent last song
+SkipBackIntent previous
+SkipBackIntent previous track
+SkipBackIntent previous song
+SkipBackIntent skip back
+SkipBackIntent skip backward
+SkipBackIntent last track in the {Speaker}
+SkipBackIntent last song in the {Speaker}
+SkipBackIntent previous track in the {Speaker}
+SkipBackIntent previous song in the {Speaker}
+SkipBackIntent skip back in the {Speaker}
+SkipBackIntent skip backward in the {Speaker}
+SkipBackIntent last track on the {Speaker}
+SkipBackIntent last song on the {Speaker}
+SkipBackIntent previous track on the {Speaker}
+SkipBackIntent previous song on the {Speaker}
+SkipBackIntent skip back on the {Speaker}
+SkipBackIntent skip backward on the {Speaker}
