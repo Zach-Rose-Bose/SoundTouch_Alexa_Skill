@@ -149,7 +149,7 @@ function SkipBackIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -160,7 +160,7 @@ function SkipBackIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Skipping back in the " + speaker + ".";
                     shouldEndSession = true;
-                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track';
                     console.log(commandURI);
                     http.get(commandURI, function(res) {
@@ -201,7 +201,7 @@ function SkipBackIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Skipping back.";
                 shouldEndSession = true;
-                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track';
 
                 console.log(commandURI);
@@ -239,7 +239,7 @@ function SkipForwardIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -250,7 +250,7 @@ function SkipForwardIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Skipping forward in the " + speaker + ".";
                     shouldEndSession = true;
-                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track';    
                     console.log(commandURI);
                     http.get(commandURI, function(res) {
@@ -291,7 +291,7 @@ function SkipForwardIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Skipping forward.";
                 shouldEndSession = true;
-                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/next_track';    
                 console.log(commandURI);
                 http.get(commandURI, function(res) {
@@ -347,7 +347,7 @@ function VolumeChangeIntent(intent, session, callback) {
         /**
          * NOTICE: you must escape speaker names before making them part of a request back to the server.
          */
-        getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+        getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
             // check if there is a speaker slot
             if (speakerSlot.value){
                 var speaker = speakerSlot.value.toLowerCase();
@@ -362,7 +362,7 @@ function VolumeChangeIntent(intent, session, callback) {
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[speaker].currentVolume;
                             var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp;
 
                             console.log(commandURI);
@@ -382,7 +382,7 @@ function VolumeChangeIntent(intent, session, callback) {
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[speaker].currentVolume;
                             var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown;
 
                             console.log(commandURI);
@@ -425,7 +425,7 @@ function VolumeChangeIntent(intent, session, callback) {
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
                             var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeUp;
 
                             console.log(commandURI);
@@ -444,7 +444,7 @@ function VolumeChangeIntent(intent, session, callback) {
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
                             var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/volume/' + newVolumeDown;
 
                             console.log(commandURI);
@@ -493,7 +493,7 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         if (presetSlot && speakerSlot) {
             
             // something is in both slots, need to verify what
@@ -510,7 +510,7 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
                     
                     speechOutput = "Queueing up the jams on your " + speaker + " speaker. Enjoy!";
                     shouldEndSession = true;
-                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/PRESET_' + encodeURIComponent(presetSlot.value);
                     
                     console.log(commandURI);
@@ -573,7 +573,7 @@ function ZonesIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         // check if all slots were received
         if (actionSlot.hasOwnProperty('value') && masterSlot.hasOwnProperty('value') && slaveSlot.hasOwnProperty('value')) {
             var action = actionSlot.value.toLowerCase();
@@ -602,7 +602,7 @@ function ZonesIntent(intent, session, callback) {
                             // is a master, so need to just add slave
                             speechOutput = "Adding " + slave + " to your " + master + " group.";
                             shouldEndSession = true;
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[master].name) + '/addZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
                             
                             console.log(commandURI);
@@ -620,7 +620,7 @@ function ZonesIntent(intent, session, callback) {
                             // not a master, so need to make zone
                             speechOutput = "Adding " + slave + " to your " + master + ", forming " + master + " group.";
                             shouldEndSession = true;
-                            var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                            var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                             + encodeURIComponent(userHomeState.speakers[master].name) + '/setZone/' + encodeURIComponent(userHomeState.speakers[slave].name);
                             
                             console.log(commandURI);
@@ -639,7 +639,7 @@ function ZonesIntent(intent, session, callback) {
                         
                         speechOutput = "Removing " + slave + " from your " + master + " group.";
                         shouldEndSession = true;
-                        var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                        var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                         + encodeURIComponent(userHomeState.speakers[master].name) + '/removeZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
                         
                         console.log(commandURI);
@@ -694,7 +694,7 @@ function PauseIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -705,7 +705,7 @@ function PauseIntent(intent, session, callback) {
                     // is playing
                     speechOutput = "Pausing the " + speaker + ".";
                     shouldEndSession = true;
-                     var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                     var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                      + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/pause';
                     
                     console.log(commandURI);
@@ -745,7 +745,7 @@ function PauseIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
                 speechOutput = "Pausing.";
                 shouldEndSession = true;
-                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/pause';
                 
                 console.log(commandURI);
@@ -783,7 +783,7 @@ function PlayIntent(intent, session, callback) {
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -793,7 +793,7 @@ function PlayIntent(intent, session, callback) {
                     // is paused
                     speechOutput = "Playing the " + speaker + ".";
                     shouldEndSession = true;
-                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/play';
                     
                     console.log(commandURI);
@@ -817,7 +817,7 @@ function PlayIntent(intent, session, callback) {
                     // is off
                     speechOutput = "Powering up and playing the " + speaker + ".";
                     shouldEndSession = true;
-                    var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                    var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOn';
                     
                     console.log(commandURI);
@@ -854,7 +854,7 @@ function PlayIntent(intent, session, callback) {
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE") {
                 speechOutput = "Playing.";
                 shouldEndSession = true;
-                var commandURI = 'http://alexabridge.zwrose.com/api/homeKeys/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/play';
                 
                 console.log(commandURI);
@@ -882,22 +882,19 @@ function PlayIntent(intent, session, callback) {
 
 // --------------- Helper that gets info about the state of the user's home -----------------------
 
-function getBoseHomeState(alexaID, boseCallback) {
-    http.get('http://alexabridge.zwrose.com/api/homeStates/' + bridgeID, function(res) {
+function getBoseHomeState(callback, alexaID, boseCallback) {
+    console.log("AlexaID:", alexaID);
+    http.get('http://alexabridge.zwrose.com/api/homes/' + alexaID, function(res) {
         var homeStateBody = '';
         res.on('data', function(chunk) {homeStateBody += chunk;});
         res.on('end', function() {
-            var homeState = JSON.parse(homeStateBody).currentState;
-            if(!homeState){
-                console.log("Home State not returned, creating new user.");
-                
+            var homeState = JSON.parse(homeStateBody);
+            if(!homeState || homeState.currentState == "undefined"){
+                console.log("Home does not yet exist, responding with error.");
+                callback({}, buildSpeechletResponse("Config Error", "This account is not configured yet, or there has been an error. Please contact Zach Rose for assistance.", "", true));
             } else {
-                boseCallback(homeState, bridgeID);
+                boseCallback(homeState.currentState, homeState.id);
             }
-            
-            
-            
-
         });
     }).on('error', function(e) {
         console.log("Got error: " + e.message);
