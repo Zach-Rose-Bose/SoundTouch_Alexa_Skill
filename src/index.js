@@ -90,6 +90,8 @@ function onIntent(intentRequest, session, callback) {
         PauseIntent(intent, session, callback);
     } else if ("PlayIntent" === intentName) {
         PlayIntent(intent, session, callback);
+    } else if ("PowerOffIntent" === intentName) {
+        PowerOffIntent(intent, session, callback);
     } else if ("SkipForwardIntent" === intentName) {
         SkipForwardIntent(intent, session, callback);
     } else if ("SkipBackIntent" === intentName) {
@@ -879,6 +881,84 @@ function PlayIntent(intent, session, callback) {
     });
 }
 
+function PowerOffIntent(intent, session, callback) {
+    console.log("Intents received: ",intent.slots);
+    var cardTitle = intent.name;
+    var speakerSlot = intent.slots.Speaker;
+    var repromptText = "";
+    var sessionAttributes = {};
+    var shouldEndSession = false;
+    var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
+
+    /**
+     * NOTICE: you must escape speaker names before making them part of a request back to the server.
+     */
+    getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
+        // check if there is a speaker slot
+        if (speakerSlot.value){
+            var speaker = speakerSlot.value.toLowerCase();
+            console.log('[ OK ] Speaker sent. Turning off.');
+            
+            if (userHomeState.speakers.hasOwnProperty(speaker)) {
+                speechOutput = "Turning off the " + speaker + ".";
+                shouldEndSession = true;
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOff';
+
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
+                    res.resume();
+                    res.on('end', function(){
+                        console.log('[ OK ] Request complete. Sending response to Alexa.');
+                        callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+
+                    });
+                });
+
+                
+            } else {
+                // speaker not found
+                console.log('[ WARN ] Speaker is not a vaild option.');
+                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+            }
+            
+        } else {
+            console.log('[ OK ] No speaker sent. Investigating...');
+            if (userHomeState.zonesPlaying.length <= 0) {
+                console.log('[ OK ] Nothing is on. Exiting skill.');
+                speechOutput = "Nothing is on!";
+                shouldEndSession = true;
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                
+            } else if (userHomeState.zonesPlaying.length == 1) {
+                speechOutput = "Powering off.";
+                shouldEndSession = true;
+                var commandURI = 'http://alexabridge.zwrose.com/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/' 
+                + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/powerOff';
+                
+                console.log(commandURI);
+                http.get(commandURI, function(res) {
+                    res.resume();
+                    res.on('end', function(){
+                        console.log('[ OK ] Request complete. Sending response to Alexa.');
+                        callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                        
+                    });
+                });
+                
+            } else {
+                console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
+                speechOutput = "Multiple speakers or groups are active. Please try again and specify which you'd like to power off. Say something like 'Turn off the living room.'.";
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                
+            }
+            
+        }
+        
+    });
+}
 
 // --------------- Helper that gets info about the state of the user's home -----------------------
 
@@ -889,7 +969,7 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
         res.on('data', function(chunk) {homeStateBody += chunk;});
         res.on('end', function() {
             var homeState = JSON.parse(homeStateBody);
-            if(!homeState || Object.keys(homeState.currentState).length === 0){
+            if(homeState.error || Object.keys(homeState.currentState).length === 0){
                 console.log("Home does not yet exist, responding with error.");
                 callback({}, buildSpeechletResponse("Config Error", "This account is not configured yet, or there has been an error. Please contact Zach Rose for assistance.", "", true));
             } else {
