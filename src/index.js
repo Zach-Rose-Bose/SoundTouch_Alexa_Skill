@@ -889,7 +889,7 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
         res.on('data', function(chunk) {homeStateBody += chunk;});
         res.on('end', function() {
             var homeState = JSON.parse(homeStateBody);
-            if(!homeState || homeState.currentState == "undefined"){
+            if(!homeState || Object.keys(homeState.currentState).length === 0){
                 console.log("Home does not yet exist, responding with error.");
                 callback({}, buildSpeechletResponse("Config Error", "This account is not configured yet, or there has been an error. Please contact Zach Rose for assistance.", "", true));
             } else {
