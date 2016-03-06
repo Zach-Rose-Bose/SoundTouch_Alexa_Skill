@@ -10,7 +10,7 @@ var http = require('http');
 
 ////////// CONFIG //////////
 var bridgeBasePath = "http://alexabridge.zwrose.com";
-var bridgeID = 1;
+// var bridgeID = 1;
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
 exports.handler = function (event, context) {
@@ -144,11 +144,12 @@ function SkipBackIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -233,11 +234,12 @@ function SkipForwardIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -324,6 +326,7 @@ function VolumeChangeIntent(intent, session, callback) {
     var speechOutput = "";
     var validVolumeChanges = ['up', 'down', 'louder', 'softer'];
     var volumeDelta = 10;
+    var alexaID = session.user.userId.slice(23);
     
     if (!volumeChangeSlot.value) {
         // did not get a volume change, so don't know what to do.
@@ -344,7 +347,7 @@ function VolumeChangeIntent(intent, session, callback) {
         /**
          * NOTICE: you must escape speaker names before making them part of a request back to the server.
          */
-        getBoseHomeState(function(userHomeState) {
+        getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
             // check if there is a speaker slot
             if (speakerSlot.value){
                 var speaker = speakerSlot.value.toLowerCase();
@@ -485,11 +488,12 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
     var shouldEndSession = false;
     var speechOutput = "";
     var availablePresets = ['1','2','3','4','5','6'];
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         if (presetSlot && speakerSlot) {
             
             // something is in both slots, need to verify what
@@ -564,11 +568,12 @@ function ZonesIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         // check if all slots were received
         if (actionSlot.hasOwnProperty('value') && masterSlot.hasOwnProperty('value') && slaveSlot.hasOwnProperty('value')) {
             var action = actionSlot.value.toLowerCase();
@@ -684,11 +689,12 @@ function PauseIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -772,11 +778,12 @@ function PlayIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
+    var alexaID = session.user.userId.slice(23);
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
-    getBoseHomeState(function(userHomeState) {
+    getBoseHomeState(alexaID, function(userHomeState, bridgeID) {
         // check if there is a speaker slot
         if (speakerSlot.value){
             var speaker = speakerSlot.value.toLowerCase();
@@ -875,13 +882,21 @@ function PlayIntent(intent, session, callback) {
 
 // --------------- Helper that gets info about the state of the user's home -----------------------
 
-function getBoseHomeState(boseCallback) {
+function getBoseHomeState(alexaID, boseCallback) {
     http.get('http://alexabridge.zwrose.com/api/homeStates/' + bridgeID, function(res) {
         var homeStateBody = '';
         res.on('data', function(chunk) {homeStateBody += chunk;});
         res.on('end', function() {
             var homeState = JSON.parse(homeStateBody).currentState;
-            boseCallback(homeState);
+            if(!homeState){
+                console.log("Home State not returned, creating new user.");
+                
+            } else {
+                boseCallback(homeState, bridgeID);
+            }
+            
+            
+            
 
         });
     }).on('error', function(e) {
