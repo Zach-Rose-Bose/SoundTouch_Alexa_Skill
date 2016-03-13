@@ -995,7 +995,7 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
                     res.resume();
                     res.on('end', function(){
                         console.log('PUT complete');
-                        callback({}, buildSpeechletResponse("New Home", "This home had not yet been configured. I've attempted to create a new home instance on the remote server. A corresponding local server will need to be configured to report to that home.", "", true));
+                        callback({}, buildSpeechletResponse("New Home", "This home had not yet been configured. I've attempted to create a new home instance on the remote server using AlexaID: " + alexaID + ". A corresponding local server will need to be configured to report to that home.", "", true));
                     });
                 };
 
@@ -1005,7 +1005,7 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
  
             } else if(Object.keys(homeState.currentState).length === 0){
                 console.log("Home exists, but the currentState is empty. AlexaID:", alexaID);
-                callback({}, buildSpeechletResponse("No Home State", "This home does not appear to have any speakers on the network. Please be sure the local server is running and reporting to the correct home instance in the remote server.", "", true));
+                callback({}, buildSpeechletResponse("No Home State", "This home, based on AlexaID: " + alexaID + ", does not appear to have any speakers on the network. Please be sure the local server is running and reporting to the correct home instance in the remote server.", "", true));
             } else {
                 boseCallback(homeState.currentState, homeState.id);
             }
