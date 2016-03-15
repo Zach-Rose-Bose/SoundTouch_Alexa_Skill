@@ -148,7 +148,7 @@ function SkipBackIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -238,7 +238,7 @@ function SkipForwardIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -330,7 +330,7 @@ function VolumeChangeIntent(intent, session, callback) {
     var speechOutput = "";
     var validVolumeChanges = ['up', 'down', 'louder', 'softer'];
     var volumeDelta = 10;
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
     
     if (!volumeChangeSlot.value) {
         // did not get a volume change, so don't know what to do.
@@ -484,20 +484,20 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
     var presetSlot = intent.slots.Preset;
     var preset = presetSlot.value;
     var speakerSlot = intent.slots.Speaker;
-    var speaker = speakerSlot.value.toLowerCase();
+    
     var repromptText = "";
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
     var availablePresets = ['1','2','3','4','5','6'];
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
      */
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        if (presetSlot && speakerSlot) {
-            
+        if (presetSlot.value && speakerSlot.value) {
+            var speaker = speakerSlot.value.toLowerCase();
             // something is in both slots, need to verify what
             console.log('[ OK ] Received both a preset slot and a speaker slot from Alexa.');
             if (availablePresets.indexOf(preset) > -1) {
@@ -570,7 +570,7 @@ function ZonesIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -691,7 +691,7 @@ function PauseIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -780,7 +780,7 @@ function PlayIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -889,7 +889,7 @@ function PowerOffIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var alexaID = session.user.userId.slice(23);
+    var alexaID = session.user.userId;
 
     /**
      * NOTICE: you must escape speaker names before making them part of a request back to the server.
@@ -963,7 +963,6 @@ function PowerOffIntent(intent, session, callback) {
 // --------------- Helper that gets info about the state of the user's home -----------------------
 
 function getBoseHomeState(callback, alexaID, boseCallback) {
-    console.log("AlexaID:", alexaID);
     http.get(bridgeBasePath + '/api/homes/' + alexaID, function(res) {
         var homeStateBody = '';
         res.on('data', function(chunk) {homeStateBody += chunk;});
@@ -971,7 +970,6 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
             var homeState = JSON.parse(homeStateBody);
             if(homeState.error){
                 console.log("Home does not yet exist for this AlexaID. Creating home with AlexaID:", alexaID);
-                // TODO Put to alexabridge
                 var bodyString = JSON.stringify({
                   "alexaID": "",
                   "keyStack": [],
