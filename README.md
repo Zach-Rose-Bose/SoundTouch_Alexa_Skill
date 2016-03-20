@@ -7,7 +7,7 @@ This repository contains one of the three components necessary enable Alexa to c
 This Alexa Skill Component includes an AWS Lambda function to serve as the logic engine for the skill, as well as the speech assets necessary to build the voice interaction model. The Lambda function talks to an AlexaSoundTouch\_RemoteServer instance to understand the current home environment and to queue up commands for the speakers.
 
 ## Setup
-These instructions assume you already have spun up or have access to an [AlexaSoundTouch\_RemoteServer](https://github.com/zwrose/AlexaSoundTouch_RemoteServer) instance.
+These instructions assume you already have set up or otherwise have access to an [AlexaSoundTouch\_RemoteServer](https://github.com/zwrose/AlexaSoundTouch_RemoteServer) instance.
 
 1. From the [AWS Console](https://console.aws.amazon.com), create a Lambda function based on the alexa-skills-kit-color-expert nodejs blueprint.
 2. In Step 3 of the Lambda Function configuration, copy the contents of src/index.js from this repository into the Lambda Function Code field.
@@ -22,7 +22,7 @@ Now proceed to [AlexaSoundTouch\_LocalServer](https://github.com/zwrose/AlexaSou
 ## Supported Commands
 The below are general examples of possible skill usage. Many other word permutations around the listed functionality will also work.
 
-Where possible, the skill will try to be smart about generic requests (e.g., if you ask it to pause without specifying a speak and only one speaker is playing, it will pause that speaker.)
+Where possible, the skill will try to be smart about generic requests (e.g., if you ask it to pause without specifying a speaker and only one speaker is playing, it will pause that speaker.)
 
 ### Starting Playback
 + "ask bose to play preset \<1-6> on the \<speaker name>"
@@ -35,6 +35,10 @@ Where possible, the skill will try to be smart about generic requests (e.g., if 
 + "ask bose to skip back (the \<speaker name>)"
 + "ask bose to turn (it) up (the \<speaker name>)"
 + "ask bose to turn (it) down (the \<speaker name>)"
+
+### Grouping Control
++ "ask bose to add my \<Speaker 1 name> to my \<Speaker 2 name> (Speaker 2 must already be playing)
++ "ask bose to remove my \<Speaker 1 name> from my \<Speaker 2 name> (Speaker 1 and Speaker 2 must be in a group together, and Speaker 2 must be the master)
 
 ### Shutting It Down
 + "ask bose to turn off (the \<speaker name>)
