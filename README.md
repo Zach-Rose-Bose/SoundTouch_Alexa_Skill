@@ -11,7 +11,7 @@ These instructions assume you already have set up or otherwise have access to an
 
 1. From the [AWS Console](https://console.aws.amazon.com), create a Lambda function based on the alexa-skills-kit-color-expert nodejs blueprint.
 2. In Step 3 of the Lambda Function configuration, copy the contents of src/index.js from this repository into the Lambda Function Code field.
-3. Replace the placeholder bridgeBasePath variable (line 14) with the base path to your AlexaSoundTouch\_RemoteServer instance. Be sure to include "http(s)://" in the string.
+3. Replace the placeholder bridgeBasePath variable (line 14) with the base path to your AlexaSoundTouch\_RemoteServer instance. Be sure to include "http://" or "https://" in the string.
 4. Complete the function using the recommended defaults.
 5. From the [Amazon Developer console](http://developer.amazon.com), go to Apps & Services >>> Alexa >>> Alexa Skills Kit >>> Add a new skill
 6. Use the wizard to create the skill. Recommended to use "bose" as the invocation word. Use the ARN from your Lambda function for your Endpoint, and use the assets from /speechAssets in this repository when defining the interaction model. Add any of your custom speaker names to the LIST\_OF\_SPEAKERS. 
