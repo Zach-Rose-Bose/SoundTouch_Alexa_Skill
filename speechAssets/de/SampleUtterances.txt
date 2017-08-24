@@ -1,0 +1,107 @@
+PlayPresetToSpeakerIntent spiele Preset {Preset} auf {Speaker}
+PlayPresetToSpeakerIntent spiele Preset {Preset} in dem {Speaker}
+PlayPresetToSpeakerIntent spiele Preset {Preset} im {Speaker}
+PlayPresetToSpeakerIntent spiele Preset {Preset} auf meinem {Speaker}
+PlayPresetToSpeakerIntent spiele Preset {Preset} in meinem {Speaker}
+PlayPresetToSpeakerIntent spiele Preset {Preset} in meiner {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} auf {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} in dem {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} im {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} auf meinem {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} in meinem {Speaker}
+PlayPresetToSpeakerIntent spiele Einstellung {Preset} in meiner {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} auf {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} in dem {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} im {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} auf meinem {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} in meinem {Speaker}
+PlayPresetToSpeakerIntent Preset {Preset} in meiner {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} auf {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} in dem {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} im {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} auf meinem {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} in meinem {Speaker}
+PlayPresetToSpeakerIntent Einstellung {Preset} in meiner {Speaker}
+PlayPresetToSpeakerIntent {Preset} auf {Speaker}
+PlayPresetToSpeakerIntent {Preset} in dem {Speaker}
+PlayPresetToSpeakerIntent {Preset} im {Speaker}
+PlayPresetToSpeakerIntent {Preset} auf meinem {Speaker}
+PlayPresetToSpeakerIntent {Preset} in meinem {Speaker}
+PlayPresetToSpeakerIntent {Preset} in meiner {Speaker}
+
+ZonesIntent {Slave} zu {Master} {Action}
+ZonesIntent {Slave} mit {Master} {Action}
+ZonesIntent {Slave} von {Master} {Action}
+ZonesIntent {Action} {Slave} {Master} hinzu
+
+PauseIntent Pause
+PauseIntent pausieren
+PauseIntent anhalten
+PauseIntent Musik pausieren
+PauseIntent pausiere {Speaker}
+PauseIntent pausiere den Lautsprecher {Speaker}
+PauseIntent pausiere die Box {Speaker}
+PauseIntent pausiere {Speaker}
+
+PlayIntent spiele
+PlayIntent spiel Musik
+PlayIntent spiel Musik auf {Speaker}
+PlayIntent spiel Musik in {Speaker}
+PlayIntent spiel Musik im {Speaker}
+PlayIntent spiel weiter
+PlayIntent fortsetzten
+PlayIntent setzte die Musik fort
+PlayIntent spiel weiter
+PlayIntent spiel im {Speaker} weiter
+PlayIntent spiel auf {Speaker} weiter
+PlayIntent spiel in {Speaker} weiter
+
+VolumeChangeIntent Musik {VolumeChange}
+VolumeChangeIntent Lautstärke {VolumeChange}
+VolumeChangeIntent mach {VolumeChange}
+VolumeChangeIntent mache {Speaker} {VolumeChange}
+VolumeChangeIntent mach {Speaker} {VolumeChange}
+VolumeChangeIntent mach die Musik auf {Speaker} {VolumeChange}
+VolumeChangeIntent mach die Musik im {Speaker} {VolumeChange}
+VolumeChangeIntent {Speaker} {VolumeChange}
+VolumeChangeIntent Laustärke in der {Speaker} {VolumeChange}
+VolumeChangeIntent Laustärke in dem {Speaker} {VolumeChange}
+VolumeChangeIntent Laustärke in im {Speaker} {VolumeChange}
+
+SkipForwardIntent weiter
+SkipForwardIntent nächstes Lied
+SkipForwardIntent nächster Track
+SkipForwardIntent überspringen
+SkipForwardIntent Lied überspringen
+SkipForwardIntent auslassen
+SkipForwardIntent weiter auf {Speaker}
+SkipForwardIntent nächstes Lied auf {Speaker}
+SkipForwardIntent nächster Track auf {Speaker}
+SkipForwardIntent überspringen auf {Speaker}
+SkipForwardIntent Lied überspringen auf {Speaker}
+SkipForwardIntent auslassen auf {Speaker}
+SkipForwardIntent {Speaker} weiter
+SkipForwardIntent {Speaker} nächstes Lied
+SkipForwardIntent {Speaker} nächster Track
+SkipForwardIntent {Speaker} überspringen
+SkipForwardIntent {Speaker} Lied überspringen
+SkipForwardIntent {Speaker} auslassen
+
+SkipBackIntent zurück
+SkipBackIntent letztes Lied
+SkipBackIntent nochmal
+SkipBackIntent vorheriges
+SkipBackIntent vorheriges Lied
+SkipBackIntent zurückgehen
+SkipBackIntent {Speaker} zurück
+SkipBackIntent {Speaker} letztes Lied
+SkipBackIntent {Speaker} nochmal
+SkipBackIntent {Speaker} vorheriges
+SkipBackIntent {Speaker} vorheriges Lied
+SkipBackIntent {Speaker} zurückgehen
+SkipBackIntent zurück auf {Speaker}
+SkipBackIntent letztes Lied auf {Speaker}
+SkipBackIntent nochmal auf {Speaker}
+SkipBackIntent vorheriges auf {Speaker}
+SkipBackIntent vorheriges Lied auf {Speaker}
+SkipBackIntent zurückgehen auf {Speaker}
