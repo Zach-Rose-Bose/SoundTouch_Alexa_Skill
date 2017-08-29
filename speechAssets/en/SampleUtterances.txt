@@ -105,3 +105,10 @@ SkipBackIntent previous track on the {Speaker}
 SkipBackIntent previous song on the {Speaker}
 SkipBackIntent skip back on the {Speaker}
 SkipBackIntent skip backward on the {Speaker}
+
+PowerOffIntent Turn off the {Speaker}
+PowerOffIntent stop playback on {Speaker}
+PowerOffIntent stop {Speaker}
+PowerOffIntent Turn off
+PowerOffIntent stop
+PowerOffIntent stop playback

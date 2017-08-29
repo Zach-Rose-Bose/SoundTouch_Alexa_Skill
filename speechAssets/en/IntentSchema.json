@@ -1,0 +1,101 @@
+{
+  "intents": [
+    {
+      "intent": "PlayPresetToSpeakerIntent",
+      "slots": [
+        {
+          "name": "Preset",
+          "type": "AMAZON.NUMBER"
+        },
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "ZonesIntent",
+      "slots": [
+        {
+          "name": "Action",
+          "type": "ZONE_ACTION"
+        },
+        {
+          "name": "Slave",
+          "type": "LIST_OF_SPEAKERS"
+        },
+        {
+          "name": "Master",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "PauseIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "PlayIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "PowerOffIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "SkipForwardIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "SkipBackIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "VolumeChangeIntent",
+      "slots": [
+        {
+          "name": "VolumeChange",
+          "type": "VOLUME_CHANGES"
+        },
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}
