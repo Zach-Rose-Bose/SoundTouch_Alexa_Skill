@@ -28,12 +28,11 @@ PlayPresetToSpeakerIntent {Preset} im {Speaker}
 PlayPresetToSpeakerIntent {Preset} auf meinem {Speaker}
 PlayPresetToSpeakerIntent {Preset} in meinem {Speaker}
 PlayPresetToSpeakerIntent {Preset} in meiner {Speaker}
-
 ZonesIntent {Slave} zu {Master} {Action}
 ZonesIntent {Slave} mit {Master} {Action}
 ZonesIntent {Slave} von {Master} {Action}
+ZonesIntent verbinde {Slave} mit {Master}
 ZonesIntent {Action} {Slave} {Master} hinzu
-
 PauseIntent Pause
 PauseIntent pausieren
 PauseIntent anhalten
@@ -42,32 +41,18 @@ PauseIntent pausiere {Speaker}
 PauseIntent pausiere den Lautsprecher {Speaker}
 PauseIntent pausiere die Box {Speaker}
 PauseIntent pausiere {Speaker}
-
 PlayIntent spiele
-PlayIntent spiel Musik
-PlayIntent spiel Musik auf {Speaker}
-PlayIntent spiel Musik in {Speaker}
-PlayIntent spiel Musik im {Speaker}
-PlayIntent spiel weiter
+PlayIntent spiele Musik
+PlayIntent spiele Musik auf {Speaker}
+PlayIntent spiele Musik in {Speaker}
+PlayIntent spiele Musik im {Speaker}
+PlayIntent spiele weiter
 PlayIntent fortsetzten
 PlayIntent setzte die Musik fort
-PlayIntent spiel weiter
-PlayIntent spiel im {Speaker} weiter
-PlayIntent spiel auf {Speaker} weiter
-PlayIntent spiel in {Speaker} weiter
-
-VolumeChangeIntent Musik {VolumeChange}
-VolumeChangeIntent Lautstärke {VolumeChange}
-VolumeChangeIntent mach {VolumeChange}
-VolumeChangeIntent mache {Speaker} {VolumeChange}
-VolumeChangeIntent mach {Speaker} {VolumeChange}
-VolumeChangeIntent mach die Musik auf {Speaker} {VolumeChange}
-VolumeChangeIntent mach die Musik im {Speaker} {VolumeChange}
-VolumeChangeIntent {Speaker} {VolumeChange}
-VolumeChangeIntent Laustärke in der {Speaker} {VolumeChange}
-VolumeChangeIntent Laustärke in dem {Speaker} {VolumeChange}
-VolumeChangeIntent Laustärke in im {Speaker} {VolumeChange}
-
+PlayIntent spiele weiter
+PlayIntent spiele im {Speaker} weiter
+PlayIntent spiele auf {Speaker} weiter
+PlayIntent spiele in {Speaker} weiter
 SkipForwardIntent weiter
 SkipForwardIntent nächstes Lied
 SkipForwardIntent nächster Track
@@ -86,7 +71,6 @@ SkipForwardIntent {Speaker} nächster Track
 SkipForwardIntent {Speaker} überspringen
 SkipForwardIntent {Speaker} Lied überspringen
 SkipForwardIntent {Speaker} auslassen
-
 SkipBackIntent zurück
 SkipBackIntent letztes Lied
 SkipBackIntent nochmal
@@ -105,3 +89,26 @@ SkipBackIntent nochmal auf {Speaker}
 SkipBackIntent vorheriges auf {Speaker}
 SkipBackIntent vorheriges Lied auf {Speaker}
 SkipBackIntent zurückgehen auf {Speaker}
+VolumeChangeIntent Musik {VolumeChange}
+VolumeChangeIntent Lautstärke {VolumeChange}
+VolumeChangeIntent mach {VolumeChange}
+VolumeChangeIntent mache {Speaker} {VolumeChange}
+VolumeChangeIntent mach {Speaker} {VolumeChange}
+VolumeChangeIntent mach die Musik auf {Speaker} {VolumeChange}
+VolumeChangeIntent mach die Musik im {Speaker} {VolumeChange}
+VolumeChangeIntent {Speaker} {VolumeChange}
+VolumeChangeIntent {VolumeChange} auf {Speaker}
+VolumeChangeIntent {VolumeChange} im {Speaker}
+VolumeChangeIntent {VolumeChange} in dem {Speaker}
+VolumeChangeIntent Laustärke in der {Speaker} {VolumeChange}
+VolumeChangeIntent Laustärke in dem {Speaker} {VolumeChange}
+VolumeChangeIntent Laustärke in im {Speaker} {VolumeChange}
+PowerOffIntent stoppe {Speaker}
+PowerOffIntent stoppe Latsprecher {Speaker}
+PowerOffIntent stoppe Wiedergabe {Speaker}
+PowerOffIntent stoppe Wiedergabe  in der {Speaker}
+PowerOffIntent stoppe Wiedergabe  in dem {Speaker}
+PowerOffIntent stoppe Wiedergabe  im {Speaker}
+PowerOffIntent stop
+PowerOffIntent ausschalten
+PowerOffIntent beenden

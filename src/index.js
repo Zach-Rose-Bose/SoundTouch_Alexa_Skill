@@ -15,6 +15,204 @@ var bridgeBasePath = "http://<your.basepath.here>";
 ////////////////////////////
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
+
+// --------------------------------------
+// -- Defines all the language outputs --
+// --------------------------------------
+
+var locale = "en"; // Default Locale
+var skillResp = { // All responses from the skill
+  'getWelcomeResponse': {
+    'de': "Willkommen zu Bose SoundTouch! Du kannst diesen Skill nutzen um die Wiedergabe zu starten oder pausieren, Musik zu überspringen, die Lautstärke zu regeln oder Wiedergabegruppen zu erstellen. Um zu starten sage etwas wie Spiele Einstellung 1 in meinem Wohnzimmer.",
+    'en': "Welcome to Bose SoundTouch! You can use this skill to start playback, create or collapse groups, play, pause, and/or skip your music, or change the volume of your SoundTouch devices. To start the music, say something like, Play preset 4 in the living room."
+  },
+  // -- SkipBackIntent --
+  'SkipBackIntent': {
+    'de': "Starte Vorheriges Lied.",
+    'en': "Skipping back."
+  },
+  'SkipBackIntentSpeaker': {
+    'de': "Vorheriges Lied auf ${speaker}.",
+    'en': "Skipping back in the ${speaker}."
+  },
+  'SkipBackIntentErrorSpeaker': {
+    'de': "Lautsprecher ${speaker} ist nicht eingeschaltet. Daher kann ich das vorherige Lied nicht spielen!",
+    'en': "${speaker} isn't playing. So I can't skip the track back!"
+  },
+  'SkipBackIntentErrorPlayback': {
+    'de': "Es erfolgt derzeit keine Wiedergabe. Daher kann ich das vorherige Lied nicht spielen.",
+    'en': "Nothing is playing. So I can't skip anything!"
+  },
+  'SkipBackIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und spezifiziere wo du ein Lied zurück möchtest. Sage etwas wie 'Vorheriges Lied im Wohnzimmer'.",
+    'en': "Multiple speakers or groups are active. Please try again and specify where you'd like to skip back. Say something like 'Skip back in the living room.'."
+  },
+  // -- SkipForwardIntent
+  'SkipForwardIntent': {
+    'de': "Spiele nächstes Lied.",
+    'en': "Skipping forward."
+  },
+  'SkipForwardIntentSpeaker': {
+    'de': "Nächstes Lied auf ${speaker}.",
+    'en': "Skipping forward in the ${speaker}."
+  },
+  'SkipForwardIntentErrorSpeaker': {
+    'de': "Lautsprecher ${speaker} ist nicht eingeschaltet. Daher kann ich das nächste Lied nicht spielen!",
+    'en': "${speaker} isn't playing. So I can't skip the track forward!"
+  },
+  'SkipForwardIntentErrorPlayback': {
+    'de': "Es erfolgt derzeit keine Wiedergabe. Daher kann ich das nächste Lied nicht spielen!",
+    'en': "Nothing is playing. So I can't skip anything!"
+  },
+  'SkipForwardIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du das nächste Lied spielen möchtest. Sage etwas wie 'Nächstes Lied im Wohnzimmer'.",
+    'en': "Multiple speakers or groups are active. Please try again and specify where you'd like to skip forward. Say something like 'Skip forward in the living room.'."
+  },
+  // -- VolumeChangeIntent --
+  'VolumeChangeIntentUp': {
+    'de': "Ich mache die Musik lauter.",
+    'en': "Turning it up."
+  },
+  'VolumeChangeIntentDown': {
+    'de': "Ich mache die Musik leiser.",
+    'en': "Turning it down."
+  },
+  'VolumeChangeIntentUpSpeaker': {
+    'de': "Ich mache den Lautsprecher ${speaker} lauter.",
+    'en': "Turning up the ${speaker}."
+  },
+  'VolumeChangeIntentDownSpeaker': {
+    'de': "Ich mache den Lautsprecher ${speaker} leiser.",
+    'en': "Turning down the ${speaker}."
+  },
+  'VolumeChangeIntentErrorInput': {
+    'de': "Ich habe dich leider nicht verstanden. Wenn du die Laustärke ändern möchtest, dann benutze die Wörter hoch, lauter, rauf, höher, mehr oder leiser, runter, weniger. Sage soetwas wie 'Musik leiser im Schlafzimmer.' oder 'leiser Schlafzimmer.'",
+    'en': "I didn't understand that. If you are trying to change the volume, please ask again using the words up, louder, down, or softer. Say something like, 'Turn up the living room.'"
+  },
+  'VolumeChangeIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Laustärke ändern möchtest. Sage soetwas wie 'Musik leiser im Schlafzimmer.' oder 'leiser Schlafzimmer.'",
+    'en': "Multiple speakers are active. Please try again and specify where you'd like to change the volume. Say something like 'Turn up the living room.'."
+  },
+  // -- PlayPresetToSpeakerIntent --
+  'PlayPresetToSpeakerIntent': {
+    'de': "Starte die Musik auf dem Lautsprecher ${speaker}. Viel Spaß!",
+    'en': "Queueing up the jams on your ${speaker} speaker. Enjoy!"
+  },
+  'PlayPresetToSpeakerIntentErrorWrongPreset': {
+    'de': "Ich habe Einstellung ${preset} verstanden, ich kenne aber nur die Einstellungen eins bis sechs. Bitte versuche es erneut.",
+    'en': "I heard preset number ${preset}, but I only know presets one through six. Please try again!"
+  },
+  'PlayPresetToSpeakerIntentErrorInput': {
+    'de': "Ich habe dich leider nicht verstanden. Bitte sage mir welche Einstellung du auf welchem Lautsprecher wiedergeben willst, indem du etwas sagst wie 'spiele Einstellung 1 im Wohnzimmer.'.",
+    'en': "I didn't catch that. Please tell me what preset to play by saying something like, Play preset 4 in the living room."
+  },
+  // -- ZonesIntent --
+  'ZonesIntent': {
+    'de': "Ich füge den Lautsprecher ${slave} zur Gruppe von ${master} hinzu.",
+    'en': "Adding ${slave} to your ${master} group."
+  },
+  'ZonesIntentCreate': {
+    'de': "Ich verbinde den Lautsprecher ${slave} mit dem Lautsprecher ${master} und erstelle die Gruppe ${master}.",
+    'en': "Adding ${slave} to your ${master}, forming ${master} group."
+  },
+  'ZonesIntentRemove': {
+    'de': "Ich entferne den Lautsprecher ${slave} von der Gruppe ${master}.",
+    'en': "Removing ${slave} from your ${master} group."
+  },
+  'ZonesIntentErrorInvalid': {
+    'de': "Ich kann Lautsprecher nur zu anderen Lausprechern hinzufügen oder entfernen. Bitte versuche es erneut und sage etwas wie 'Verbinde den Lautsprecher Küche mit dem Schlafzimmer.'.",
+    'en': "I can only add or remove speakers from other speakers. Please try again by saying something like: 'Add the kitchen to the living room. You must start with either the word 'add' or 'remove.'."
+  },
+  'ZonesIntentErrorSlave': {
+    'de': "Ich kann den Lautsprecher mit dem Namen ${slave} nicht finden. Bitte versuche es erneut.",
+    'en': "I don't see a speaker named ${slave} on your network. Please try again!"
+  },
+  'ZonesIntentErrorMaster': {
+    'de': "Ich kann keinen Lautsprecher mit dem Namen ${master} finden der derzeit spielt oder der Haupt-Lautsprecher ist. Du kannst einen Lautsprecher nur zu einem bereits spielenden Haupt-Lautsprecher hinzufügen. Bitte versuche es erneut.",
+    'en': "I don't see a speaker named ${master} on your network that is currently playing or is a master speaker. You can only add speakers to a currently playing master speaker. Please try again!"
+  },
+  'ZonesIntentErrorInput': {
+    'de': "Ich habe dich leider nicht verstanden. Um Lautsprecher-Gruppen zu erstellen, sage etwas wie 'Füge Lautsprecher Küche zu Lautsprecher Schlafzimmer hinzu.'.",
+    'en': "I didn't catch that. Please tell me how to adjust your playback groups by saying something like: 'Add the kitchen to the living room.' You must start with either the word 'add' or 'remove.'"
+  },
+  // -- PauseIntent --
+  'PauseIntent': {
+    'de': "Pausiere die Wiedergabe",
+    'en': "Pausing."
+  },
+  'PauseIntentSpeaker': {
+    'de': "Pausiere Lautsprecher ${speaker}",
+    'en': "Pausing the ${speaker}."
+  },
+  'PauseIntentErrorSpeakerPlayback': {
+    'de': "Derzeit keine Wiedergabe auf Lautsprecher ${speaker} die ich pausieren kann.",
+    'en': "${speaker} isn't playing. So it can't be paused!"
+  },
+  'PauseIntentErrorPlayback': {
+    'de': "Derzeit keine Wiedergabe die ich pausieren kann.",
+    'en': "Nothing is playing. So nothing can be paused!"
+  },
+  'PauseIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Wiedergabe pausieren möchtest. Sage etwas wie 'Pausiere Küche.'.",
+    'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to pause. Say something like 'Pause the living room.'."
+  },
+  // -- PlayIntent --
+  'PlayIntent': {
+    'de': "Starte Wiedergabe.",
+    'en': "Playing."
+  },
+  'PlayIntentSpeaker': {
+    'de': "Starte Wiedergabe auf Lautsprecher ${speaker}.",
+    'en': "Powering up and playing the ${speaker}."
+  },
+  'PlayIntentSpeakerResume': {
+    'de': "Fortsetzten auf Lautsprecher ${speaker}.",
+    'en': "Playing the ${speaker}."
+  },
+  'PlayIntentErrorSpeakerPlaying': {
+    'de': "Lautsprecher ${speaker} ist bereits aktiv!",
+    'en': "${speaker} is already playing!"
+  },
+  'PlayIntentErrorEverythingPlaying': {
+    'de': "Alle aktiven Lautsprecher sind bereits am spielen!",
+    'en': "Everything that is on is already playing."
+  },
+  'PlayIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'Spiele Musik im Wohnzimmer.'.",
+    'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to play. Say something like 'play the living room.'."
+  },
+  // -- PowerOffIntent --
+  'PowerOffIntent': {
+    'de': "Ich stoppe die Wiedergabe aus.",
+    'en': "Powering off."
+  },
+  'PowerOffIntentSpeaker': {
+    'de': "Schalte den Lautsprecher ${speaker} aus.",
+    'en': "Turning off the ${speaker}."
+  },
+  'PowerOffIntentErrorNotPlaying': {
+    'de': "Ich konnte keine Wiedergabe finden die ich stoppen kann.",
+    'en': "Nothing is on!"
+  },
+  'PowerOffIntentErrorMultipleSpeakers': {
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe stoppen willst. Sage etwas wie 'Stoppe die Wiedergabe im Wohnzimmer.'.",
+    'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to power off. Say something like 'Turn off the living room.'."
+  },
+  // -- Different Errors --
+  'SpeakerNotFoundError': {
+    'de': "Ich kann keinen Lautsprecher mit dem Namen ${speaker} finden. Bitte versuche es erneut.",
+    'en': "I don't see a speaker named ${speaker} on your network. Please try again!"
+  }
+};
+
+// Definition: 'SkillName': {'de': "", 'en': ""}
+// Use as: skillResp.SpeakerNotFoundError[locale];
+// Use with replace: skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
+
+// ------------------
+// -- Main Handler --
+// ------------------
+
 exports.handler = function (event, context) {
     try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
@@ -51,6 +249,15 @@ exports.handler = function (event, context) {
         }
     } catch (e) {
         context.fail("Exception: " + e);
+    }
+
+    locale = event.request.locale
+    if (locale == 'de-DE') {
+      locale = "de";
+      console.log("de");
+    }else{
+      locale = "en";
+      console.log("en");
     }
 };
 
@@ -127,9 +334,7 @@ function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
     var cardTitle = "Welcome";
-    var speechOutput = "Welcome to Bose SoundTouch! " +
-        "You can use this skill to start playback, create or collapse groups, play, pause, and/or skip your music, or change the volume of your SoundTouch devices. " +
-        "To start the music, say something like, Play preset 4 in the living room.";
+    var speechOutput = skillResp.getWelcomeResponse[locale];
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
     var repromptText = "Please tell me what I should do. You can start music by saying something like, " +
@@ -162,7 +367,7 @@ function SkipBackIntent(intent, session, callback) {
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
                 if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
                     // is playing
-                    speechOutput = "Skipping back in the " + speaker + ".";
+                    speechOutput = skillResp.SkipBackIntentSpeaker[locale].replace('${speaker}', speaker);;
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track';
@@ -179,7 +384,7 @@ function SkipBackIntent(intent, session, callback) {
                 } else {
                     // isnt playing
                     console.log('[ OK ] Not playing, cannot skip. Exiting skill.');
-                    speechOutput = speaker + " isn't playing...so I can't skip the track back!";
+                    speechOutput = skillResp.SkipBackIntentErrorSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
@@ -188,7 +393,7 @@ function SkipBackIntent(intent, session, callback) {
             } else {
                 // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
-                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
@@ -198,12 +403,12 @@ function SkipBackIntent(intent, session, callback) {
             console.log('[ OK ] No speaker sent. Investigating...');
             if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
                 console.log('[ OK ] Nothing is playing, cannot skip. Exiting skill.');
-                speechOutput = "Nothing is playing...so I can't skip anything!";
+                speechOutput = skillResp.SkipBackIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
-                speechOutput = "Skipping back.";
+                speechOutput = skillResp.SkipBackIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track';
@@ -220,7 +425,7 @@ function SkipBackIntent(intent, session, callback) {
 
             } else {
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
-                speechOutput = "Multiple speakers or groups are active. Please try again and specify where you'd like to skip back. Say something like 'Skip back in the living room.'.";
+                speechOutput = skillResp.SkipBackIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             }
@@ -252,7 +457,7 @@ function SkipForwardIntent(intent, session, callback) {
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
                 if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
                     // is playing
-                    speechOutput = "Skipping forward in the " + speaker + ".";
+                    speechOutput = skillResp.SkipForwardIntentSpeaker[locale].replace('${speaker}', speaker);;
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track';
@@ -269,7 +474,7 @@ function SkipForwardIntent(intent, session, callback) {
                 } else {
                     // isnt playing
                     console.log('[ OK ] Not playing, cannot skip. Exiting skill.');
-                    speechOutput = speaker + " isn't playing...so I can't skip the track forward!";
+                    speechOutput = skillResp.SkipForwardIntentErrorSpeaker[locale].replace('${speaker}', speaker);;
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
@@ -278,7 +483,7 @@ function SkipForwardIntent(intent, session, callback) {
             } else {
                 // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
-                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
@@ -288,12 +493,12 @@ function SkipForwardIntent(intent, session, callback) {
             console.log('[ OK ] No speaker sent. Investigating...');
             if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
                 console.log('[ OK ] Nothing is playing, cannot skip. Exiting skill.');
-                speechOutput = "Nothing is playing...so I can't skip anything!";
+                speechOutput = skillResp.SkipForwardIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
-                speechOutput = "Skipping forward.";
+                speechOutput = skillResp.SkipForwardIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/next_track';
@@ -309,7 +514,7 @@ function SkipForwardIntent(intent, session, callback) {
 
             } else {
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
-                speechOutput = "Multiple speakers or groups are active. Please try again and specify where you'd like to skip forward. Say something like 'Skip forward in the living room.'.";
+                speechOutput = skillResp.SkipForwardIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             }
@@ -335,13 +540,14 @@ function VolumeChangeIntent(intent, session, callback) {
     if (!volumeChangeSlot.value) {
         // did not get a volume change, so don't know what to do.
         console.log('[ WARN ] No VolumeChange. Exiting skill.');
-        speechOutput = "I didn't understand that. If you are trying to change the volume, please ask again using the words up, louder, down, or softer. Say something like, 'Turn up the living room.'";
+        speechOutput = skillResp.VolumeChangeIntentErrorInput[locale];
         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
     } else if (validVolumeChanges.indexOf(volumeChangeSlot.value) < 0) {
         // don't understand
         console.log('[ WARN ] Invalid VolumeChange. Exiting skill.');
-        speechOutput = "I didn't understand that. If you are trying to change the volume, please ask again using the words up, louder, down, or softer. Say something like, 'Turn up the living room.'";
+        speechOutput = skillResp.VolumeChangeIntentErrorInput[locale];
+
         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
     } else {
@@ -358,9 +564,9 @@ function VolumeChangeIntent(intent, session, callback) {
                 if (userHomeState.speakers.hasOwnProperty(speaker)) {
                     // speaker is valid, so change the volume
                     console.log('[ OK ] Speaker is valid. Changing volume.');
-                    if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder') {
+                    if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder' || volumeChangeSlot.value == 'lauter' || volumeChangeSlot.value == 'hoch' || volumeChangeSlot.value == 'rauf' || volumeChangeSlot.value == 'höher' || volumeChangeSlot.value == 'mehr') { // CHANGE: Check if it's in the group of volumeUp
                             // turn it up
-                            speechOutput = "Turning up the " + speaker + ".";
+                            speechOutput = skillResp.VolumeChangeIntentUpSpeaker[locale].replace('${speaker}', speaker);
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[speaker].currentVolume;
                             var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
@@ -380,7 +586,7 @@ function VolumeChangeIntent(intent, session, callback) {
 
                         } else {
                             // turn it down
-                            speechOutput = "Turning down the " + speaker + ".";
+                            speechOutput = skillResp.VolumeChangeIntentDownSpeaker[locale].replace('${speaker}', speaker);
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[speaker].currentVolume;
                             var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
@@ -402,7 +608,7 @@ function VolumeChangeIntent(intent, session, callback) {
                 } else {
                     // speaker not foung
                     console.log('[ WARN ] Speaker is not a vaild option.');
-                    speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                    speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
                 }
@@ -416,14 +622,14 @@ function VolumeChangeIntent(intent, session, callback) {
                     if (userHomeState.speakers[userHomeState.zonesPlaying[0]].isMaster) {
 
                         console.log('[ WARN ] Multiple are speakers active, none specified. Asking for clarification.');
-                        speechOutput = "Multiple speakers are active. Please try again and specify where you'd like to change the volume. Say something like 'Turn up the living room.'.";
+                        speechOutput = skillResp.VolumeChangeIntentErrorMultipleSpeakers[locale];
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
                     } else {
                         // just one speaker is playing - do the thing.
-                        if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder') {
+                        if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder' || volumeChangeSlot.value == 'leiser' || volumeChangeSlot.value == 'runter' || volumeChangeSlot.value == 'weniger') { // CHANGE: Check if it's in the group of volumeDown
                             // turn it up
-                            speechOutput = "Turning it up.";
+                            speechOutput = skillResp.VolumeChangeIntentUp[locale];
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
                             var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
@@ -442,7 +648,7 @@ function VolumeChangeIntent(intent, session, callback) {
 
                         } else {
                             // turn it down
-                            peechOutput = "Turning it down.";
+                            speechOutput = skillResp.VolumeChangeIntentDown[locale];
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
                             var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
@@ -465,7 +671,7 @@ function VolumeChangeIntent(intent, session, callback) {
                 } else {
                     // either nothing or multiple things are playing
                     console.log('[ WARN ]  Either multiple or zero speakers active, none specified. Asking for clarification.');
-                    speechOutput = "Either zero or multiple speakers or groups are active. Please try again and specify where you'd like to change the volume. Say something like 'Turn up the living room.'.";
+                    speechOutput = skillResp.VolumeChangeIntentErrorMultipleSpeakers[locale];
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
                 }
@@ -510,7 +716,8 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
                     // speaker is also valid, so play it!
                     console.log('[ OK ] Speaker is a valid option, too. Sending play request.');
 
-                    speechOutput = "Queueing up the jams on your " + speaker + " speaker. Enjoy!";
+                    speechOutput = skillResp.PlayPresetToSpeakerIntent[locale].replace('${speaker}', speaker);
+
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/PRESET_' + encodeURIComponent(presetSlot.value);
@@ -528,20 +735,20 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
                 } else {
                     // speaker is not found, ask again
                     console.log('[ FAIL ] Speaker is not a vaild option.');
-                    speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                    speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                 }
             } else {
                 // preset number is invalid, ask again
                 console.log('[ FAIL ] Preset is not a valid option.');
-                speechOutput = "I heard preset number " + preset + ", but I only know presets one through six. Please try again!";
+                speechOutput = skillResp.PlayPresetToSpeakerIntentErrorWrongPreset[locale].replace('${preset}', preset);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
         } else {
             // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
             console.log('[ FAIL ] Did not receive both a preset slot and a speaker slot from Alexa.');
-            speechOutput = "I didn't catch that. Please tell me what preset to play by saying something like, " + "Play preset 4 in the living room.";
+            speechOutput = skillResp.PlayPresetToSpeakerIntentErrorInput[locale];
             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
         }
     });
@@ -594,7 +801,7 @@ function ZonesIntent(intent, session, callback) {
                     console.log('[ OK ] Slave is a valid option, too.');
 
                     // check action validity
-                    if(action == 'add') {
+                    if(action == 'add' || action == 'verbinden' || action == 'hinzufügen' || action == 'füge') { // CHANGE: Add something like "in group: AddWords"
 
                         console.log('[ OK ] Action is a valid option, too ("add"). Making grouping request');
 
@@ -602,7 +809,7 @@ function ZonesIntent(intent, session, callback) {
                         if (userHomeState.speakers[master].isMaster) {
 
                             // is a master, so need to just add slave
-                            speechOutput = "Adding " + slave + " to your " + master + " group.";
+                            speechOutput = skillResp.ZonesIntent[locale].replace('${slave}', slave).replace('${master}', master);
                             shouldEndSession = true;
                             var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                             + encodeURIComponent(userHomeState.speakers[master].name) + '/addZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
@@ -620,7 +827,7 @@ function ZonesIntent(intent, session, callback) {
                         } else {
 
                             // not a master, so need to make zone
-                            speechOutput = "Adding " + slave + " to your " + master + ", forming " + master + " group.";
+                            speechOutput = skillResp.ZonesIntentCreate[locale].replace('${slave}', slave).replace('${master}', master);
                             shouldEndSession = true;
                             var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                             + encodeURIComponent(userHomeState.speakers[master].name) + '/setZone/' + encodeURIComponent(userHomeState.speakers[slave].name);
@@ -635,11 +842,11 @@ function ZonesIntent(intent, session, callback) {
                                 });
                             });
                         }
-                    } else if (action == 'remove') {
+                    } else if (action == 'remove' || action == 'entfernen' || action == 'trennen') { // CHANGE: Add something like "in group: RemoveWords"
 
                         console.log('[ OK ] Action is a valid option, too ("remove"). Making grouping request');
 
-                        speechOutput = "Removing " + slave + " from your " + master + " group.";
+                        speechOutput = skillResp.ZonesIntentRemove[locale].replace('${slave}', slave).replace('${master}', master);
                         shouldEndSession = true;
                         var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                         + encodeURIComponent(userHomeState.speakers[master].name) + '/removeZoneSlave/' + encodeURIComponent(userHomeState.speakers[slave].name);
@@ -656,27 +863,27 @@ function ZonesIntent(intent, session, callback) {
                     } else {
                         // Action is not vaild, ask again
                         console.log('[ FAIL ] Action is not a vaild option.');
-                        speechOutput = "I can only add or remove speakers from other speakers. Please try again by saying something like: 'Add the kitchen to the living room. You must start with either the word 'add' or 'remove.''";
+                        speechOutput = skillResp.ZonesIntentErrorInvalid[locale];;
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                     }
 
                 } else {
                     // slave is not found, ask again
                     console.log('[ FAIL ] Slave is not a vaild option.');
-                    speechOutput = "I don't see a speaker named " + slave + " on your network. Please try again!";
+                    speechOutput = skillResp.ZonesIntentErrorSlave[locale].replace('${slave}', slave);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                 }
             } else {
                 // master is not found, ask again
                 console.log('[ FAIL ] Master is not a valid option.');
-                    speechOutput = "I don't see a speaker named " + master + " on your network that is currently playing or is a master speaker. You can only add speakers to a currently playing master speaker. Please try again!";
+                    speechOutput = skillResp.ZonesIntentErrorMaster[locale].replace('${master}', master);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
         } else {
             // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
             console.log('[ FAIL ] Did not receive all parts from Alexa.');
-            speechOutput = "I didn't catch that. Please tell me how to adjust your playback groups by saying something like: 'Add the kitchen to the living room.' You must start with either the word 'add' or 'remove.'";
+            speechOutput = skillResp.ZonesIntentErrorInput[locale];;
             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
         }
 
@@ -705,7 +912,7 @@ function PauseIntent(intent, session, callback) {
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
                 if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
                     // is playing
-                    speechOutput = "Pausing the " + speaker + ".";
+                    speechOutput = skillResp.PauseIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                      var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                      + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/pause';
@@ -723,7 +930,7 @@ function PauseIntent(intent, session, callback) {
                 } else {
                     // isnt playing
                     console.log('[ OK ] Not playing, cannot pause. Exiting skill.');
-                    speechOutput = speaker + " isn't playing...so it can't be paused!";
+                    speechOutput = skillResp.PauseIntentErrorSpeakerPlayback[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
@@ -732,7 +939,7 @@ function PauseIntent(intent, session, callback) {
             } else {
                 // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
-                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
@@ -740,12 +947,12 @@ function PauseIntent(intent, session, callback) {
             console.log('[ OK ] No speaker sent. Investigating...');
             if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
                 console.log('[ OK ] Nothing is playing, cannot pause. Exiting skill.');
-                speechOutput = "Nothing is playing...so nothing can be paused!";
+                speechOutput = skillResp.PauseIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
-                speechOutput = "Pausing.";
+                speechOutput = skillResp.PauseIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/pause';
@@ -762,7 +969,7 @@ function PauseIntent(intent, session, callback) {
 
             } else {
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
-                speechOutput = "Multiple speakers or groups are active. Please try again and specify which you'd like to pause. Say something like 'Pause the living room.'.";
+                speechOutput =
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             }
@@ -793,7 +1000,7 @@ function PlayIntent(intent, session, callback) {
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
                 if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PAUSE_STATE") {
                     // is paused
-                    speechOutput = "Playing the " + speaker + ".";
+                    speechOutput = skillResp.PlayIntentSpeakerResume[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/play';
@@ -811,13 +1018,13 @@ function PlayIntent(intent, session, callback) {
                 } else if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
                     // isnt playing
                     console.log('[ OK ] Already playing, cannot play...more. Exiting skill.');
-                    speechOutput = speaker + " is already playing!";
+                    speechOutput = skillResp.PlayIntentErrorSpeakerPlaying[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
                 } else {
                     // is off
-                    speechOutput = "Powering up and playing the " + speaker + ".";
+                    speechOutput = skillResp.PlayIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOn';
@@ -837,7 +1044,7 @@ function PlayIntent(intent, session, callback) {
             } else {
                 // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
-                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
@@ -849,12 +1056,12 @@ function PlayIntent(intent, session, callback) {
             console.log(userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus);
             if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE")) {
                 console.log('[ OK ] Anything that is on is already playing.');
-                speechOutput = "Everything that is on is already playing.";
+                speechOutput = skillResp.PlayIntentErrorEverythingPlaying[locale];;
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE") {
-                speechOutput = "Playing.";
+                speechOutput = skillResp.PlayIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/play';
@@ -871,7 +1078,7 @@ function PlayIntent(intent, session, callback) {
 
             } else {
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
-                speechOutput = "Multiple speakers or groups are active. Please try again and specify which you'd like to play. Say something like 'play the living room.'.";
+                speechOutput = skillResp.PlayIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             }
@@ -901,7 +1108,7 @@ function PowerOffIntent(intent, session, callback) {
             console.log('[ OK ] Speaker sent. Turning off.');
 
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                speechOutput = "Turning off the " + speaker + ".";
+                speechOutput = skillResp.PowerOffIntentSpeaker[locale].replace('${speaker}', speaker);
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[speaker].name) + '/powerOff';
@@ -920,7 +1127,7 @@ function PowerOffIntent(intent, session, callback) {
             } else {
                 // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
-                speechOutput = "I don't see a speaker named " + speaker + " on your network. Please try again!";
+                speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
@@ -928,12 +1135,12 @@ function PowerOffIntent(intent, session, callback) {
             console.log('[ OK ] No speaker sent. Investigating...');
             if (userHomeState.zonesPlaying.length <= 0) {
                 console.log('[ OK ] Nothing is on. Exiting skill.');
-                speechOutput = "Nothing is on!";
+                speechOutput = skillResp.PowerOffIntentErrorNotPlaying[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             } else if (userHomeState.zonesPlaying.length == 1) {
-                speechOutput = "Powering off.";
+                speechOutput = skillResp.PowerOffIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/powerOff';
@@ -950,7 +1157,7 @@ function PowerOffIntent(intent, session, callback) {
 
             } else {
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
-                speechOutput = "Multiple speakers or groups are active. Please try again and specify which you'd like to power off. Say something like 'Turn off the living room.'.";
+                speechOutput = skillResp.PowerOffIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 
             }

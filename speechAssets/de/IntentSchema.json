@@ -49,6 +49,15 @@
       ]
     },
     {
+      "intent": "PowerOffIntent",
+      "slots": [
+        {
+          "name": "Speaker",
+          "type": "LIST_OF_SPEAKERS"
+        }
+      ]
+    },
+    {
       "intent": "SkipForwardIntent",
       "slots": [
         {
