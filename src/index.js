@@ -27,7 +27,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Welcome to Bose SoundTouch! You can use this skill to start playback, create or collapse groups, play, pause, and/or skip your music, or change the volume of your SoundTouch devices. To start the music, say something like, Play preset 4 in the living room."
   },
   'getWelcomeResponseRepromt': {
-    'de': "Bitte sag mir was ich tun soll. Du kannst die Wiedergabe starten indem du sagst 'spiele Einstellung 1 im Wohnzimmer.'.",
+    'de': "Bitte sag mir was ich tun soll. Du kannst die Wiedergabe starten indem du sagst 'spiele Einstellung 1 im Wohnzimmer'.",
     'en': "Please tell me what I should do. You can start music by saying something like, 'Play preset 4 in the living room.'."
   },
   // -- SkipBackIntent --
@@ -90,11 +90,11 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Turning down the ${speaker}."
   },
   'VolumeChangeIntentErrorInput': {
-    'de': "Ich habe dich leider nicht verstanden. Wenn du die Laustärke ändern möchtest, dann benutze die Wörter hoch, lauter, rauf, höher, mehr oder leiser, runter, weniger. Sage soetwas wie 'Musik leiser im Schlafzimmer.' oder 'leiser Schlafzimmer.'",
+    'de': "Ich habe dich leider nicht verstanden. Wenn du die Laustärke ändern möchtest, dann benutze die Wörter hoch, lauter, rauf, höher, mehr oder leiser, runter, weniger. Sage soetwas wie 'Musik leiser im Schlafzimmer' oder 'leiser Schlafzimmer'",
     'en': "I didn't understand that. If you are trying to change the volume, please ask again using the words up, louder, down, or softer. Say something like, 'Turn up the living room.'"
   },
   'VolumeChangeIntentErrorMultipleSpeakers': {
-    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Laustärke ändern möchtest. Sage soetwas wie 'Musik leiser im Schlafzimmer.' oder 'leiser Schlafzimmer.'",
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Laustärke ändern möchtest. Sage soetwas wie 'Musik leiser im Schlafzimmer' oder 'leiser Schlafzimmer'",
     'en': "Multiple speakers are active. Please try again and specify where you'd like to change the volume. Say something like 'Turn up the living room.'."
   },
   // -- PlayPresetToSpeakerIntent --
@@ -107,7 +107,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "I heard preset number ${preset}, but I only know presets one through six. Please try again!"
   },
   'PlayPresetToSpeakerIntentErrorInput': {
-    'de': "Ich habe dich leider nicht verstanden. Bitte sage mir welche Einstellung du auf welchem Lautsprecher wiedergeben willst, indem du etwas sagst wie 'spiele Einstellung 1 im Wohnzimmer.'.",
+    'de': "Ich habe dich leider nicht verstanden. Bitte sage mir welche Einstellung du auf welchem Lautsprecher wiedergeben willst, indem du etwas sagst wie 'spiele Einstellung 1 im Wohnzimmer'.",
     'en': "I didn't catch that. Please tell me what preset to play by saying something like, Play preset 4 in the living room."
   },
   // -- ZonesIntent --
@@ -124,7 +124,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Removing ${slave} from your ${master} group."
   },
   'ZonesIntentErrorInvalid': {
-    'de': "Ich kann Lautsprecher nur zu anderen Lausprechern hinzufügen oder entfernen. Bitte versuche es erneut und sage etwas wie 'Verbinde den Lautsprecher Küche mit dem Schlafzimmer.'.",
+    'de': "Ich kann Lautsprecher nur zu anderen Lausprechern hinzufügen oder entfernen. Bitte versuche es erneut und sage etwas wie 'Verbinde den Lautsprecher Küche mit dem Schlafzimmer'.",
     'en': "I can only add or remove speakers from other speakers. Please try again by saying something like: 'Add the kitchen to the living room. You must start with either the word 'add' or 'remove.'."
   },
   'ZonesIntentErrorSlave': {
@@ -136,7 +136,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "I don't see a speaker named ${master} on your network that is currently playing or is a master speaker. You can only add speakers to a currently playing master speaker. Please try again!"
   },
   'ZonesIntentErrorInput': {
-    'de': "Ich habe dich leider nicht verstanden. Um Lautsprecher-Gruppen zu erstellen, sage etwas wie 'Füge Lautsprecher Küche zu Lautsprecher Schlafzimmer hinzu.'.",
+    'de': "Ich habe dich leider nicht verstanden. Um Lautsprecher-Gruppen zu erstellen, sage etwas wie 'Füge Lautsprecher Küche zu Lautsprecher Schlafzimmer hinzu'.",
     'en': "I didn't catch that. Please tell me how to adjust your playback groups by saying something like: 'Add the kitchen to the living room.' You must start with either the word 'add' or 'remove.'"
   },
   // -- PauseIntent --
@@ -157,7 +157,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Nothing is playing. So nothing can be paused!"
   },
   'PauseIntentErrorMultipleSpeakers': {
-    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Wiedergabe pausieren möchtest. Sage etwas wie 'Pausiere Küche.'.",
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib dabei an wo du die Wiedergabe pausieren möchtest. Sage etwas wie 'Pausiere Küche'.",
     'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to pause. Say something like 'Pause the living room.'."
   },
   // -- PlayIntent --
@@ -178,7 +178,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "${speaker} is already playing!"
   },
   'PlayIntentErrorNothingActive': {
-    'de': "Keine aktiven oder pausierten Lautsprecher gefunden. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'spiele Musik im Wohnzimmer.'.",
+    'de': "Keine aktiven oder pausierten Lautsprecher gefunden. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'spiele Musik im Wohnzimmer'.",
     'en': "No active speakers found. Please try again and specify where you want to play. Say something like 'play the kitchen speaker.'."
   },
   'PlayIntentErrorEverythingPlaying': {
@@ -186,7 +186,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Everything that is on is already playing."
   },
   'PlayIntentErrorMultipleSpeakers': {
-    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'Spiele Musik im Wohnzimmer.'.",
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'Spiele Musik im Wohnzimmer'.",
     'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to play. Say something like 'play the living room.'."
   },
   // -- PowerOffIntent --
@@ -203,7 +203,7 @@ var skillResp = { // All Alexa responses from the skill can be found here
     'en': "Nothing is on!"
   },
   'PowerOffIntentErrorMultipleSpeakers': {
-    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe stoppen willst. Sage etwas wie 'Stoppe die Wiedergabe im Wohnzimmer.'.",
+    'de': "Verschiedene Lautsprecher oder Gruppen sind derzeit aktiv. Bitte versuche es erneut und gib an wo du die Wiedergabe stoppen willst. Sage etwas wie 'Stoppe die Wiedergabe im Wohnzimmer'.",
     'en': "Multiple speakers or groups are active. Please try again and specify which you'd like to power off. Say something like 'Turn off the living room.'."
   },
   // -- Different Errors --
@@ -685,8 +685,9 @@ function ZonesIntent(intent, session, callback) {
     var shouldEndSession = false;
     var speechOutput = "";
     var alexaID = session.user.userId;
-    var actionValueAdd = ['add', 'verbinden', 'hinzufügen', 'füge']; // Valid values for adding speakers
-    var actionValueRemove = ['remove', 'entfernen', 'trennen']; // Valid values for removing speakers
+    var actionValueAdd = ['add', 'hinzufügen', 'verbinden', 'verbinde', 'füge']; // Valid values for adding speakers
+    var actionValueRemove = ['remove', 'entfernen', 'trennen', "trenne", "entferne"]; // Valid values for removing speakers
+
     var validActionValues = actionValueAdd.concat(actionValueRemove); // Valid values for all actions
 
     // NOTICE: you must escape speaker names before making them part of a request back to the server.
