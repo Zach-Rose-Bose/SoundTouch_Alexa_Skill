@@ -3,6 +3,10 @@ var skillResp = { // All responses from the skill
     'de': "Willkommen zu Bose SoundTouch! Du kannst diesen Skill nutzen um die Wiedergabe zu starten oder pausieren, Musik zu überspringen, die Lautstärke zu regeln oder Wiedergabegruppen zu erstellen. Um zu starten sage etwas wie Spiele Einstellung 1 in meinem Wohnzimmer.",
     'en': "Welcome to Bose SoundTouch! You can use this skill to start playback, create or collapse groups, play, pause, and/or skip your music, or change the volume of your SoundTouch devices. To start the music, say something like, Play preset 4 in the living room."
   },
+  'getWelcomeResponseRepromt': {
+    'de': "Bitte sag mir was ich tun soll. Du kannst die Wiedergabe starten indem du sagst 'spiele Einstellung 1 im Wohnzimmer.'.",
+    'en': "Please tell me what I should do. You can start music by saying something like, 'Play preset 4 in the living room.'."
+  },
   // -- SkipBackIntent --
   'SkipBackIntent': {
     'de': "Starte Vorheriges Lied.",
@@ -149,6 +153,10 @@ var skillResp = { // All responses from the skill
   'PlayIntentErrorSpeakerPlaying': {
     'de': "Lautsprecher ${speaker} ist bereits aktiv!",
     'en': "${speaker} is already playing!"
+  },
+  'PlayIntentErrorNothingActive': {
+    'de': "Keine aktiven oder pausierten Lautsprecher gefunden. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'spiele Musik im Wohnzimmer'.",
+    'en': "No active speakers found. Please try again and specify where you want to play. Say something like 'play the kitchen speaker.'."
   },
   'PlayIntentErrorEverythingPlaying': {
     'de': "Alle aktiven Lautsprecher sind bereits am spielen!",

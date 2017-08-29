@@ -21,10 +21,14 @@ var bridgeBasePath = "http://<your.basepath.here>";
 // --------------------------------------
 
 var locale = "en"; // Default Locale
-var skillResp = { // All responses from the skill
+var skillResp = { // All Alexa responses from the skill can be found here
   'getWelcomeResponse': {
     'de': "Willkommen zu Bose SoundTouch! Du kannst diesen Skill nutzen um die Wiedergabe zu starten oder pausieren, Musik zu überspringen, die Lautstärke zu regeln oder Wiedergabegruppen zu erstellen. Um zu starten sage etwas wie Spiele Einstellung 1 in meinem Wohnzimmer.",
     'en': "Welcome to Bose SoundTouch! You can use this skill to start playback, create or collapse groups, play, pause, and/or skip your music, or change the volume of your SoundTouch devices. To start the music, say something like, Play preset 4 in the living room."
+  },
+  'getWelcomeResponseRepromt': {
+    'de': "Bitte sag mir was ich tun soll. Du kannst die Wiedergabe starten indem du sagst 'spiele Einstellung 1 im Wohnzimmer.'.",
+    'en': "Please tell me what I should do. You can start music by saying something like, 'Play preset 4 in the living room.'."
   },
   // -- SkipBackIntent --
   'SkipBackIntent': {
@@ -173,6 +177,10 @@ var skillResp = { // All responses from the skill
     'de': "Lautsprecher ${speaker} ist bereits aktiv!",
     'en': "${speaker} is already playing!"
   },
+  'PlayIntentErrorNothingActive': {
+    'de': "Keine aktiven oder pausierten Lautsprecher gefunden. Bitte versuche es erneut und gib an wo du die Wiedergabe starten möchtest. Sage etwas wie 'spiele Musik im Wohnzimmer.'.",
+    'en': "No active speakers found. Please try again and specify where you want to play. Say something like 'play the kitchen speaker.'."
+  },
   'PlayIntentErrorEverythingPlaying': {
     'de': "Alle aktiven Lautsprecher sind bereits am spielen!",
     'en': "Everything that is on is already playing."
@@ -261,31 +269,26 @@ exports.handler = function (event, context) {
     }
 };
 
-/**
- * Called when the session starts.
- */
+// -- Called when the session starts --
 function onSessionStarted(sessionStartedRequest, session) {
-    console.log("onSessionStarted requestId=" + sessionStartedRequest.requestId +
-        ", sessionId=" + session.sessionId);
+    console.log("onSessionStarted requestId=" + sessionStartedRequest.requestId +", sessionId=" + session.sessionId);
 }
 
-/**
- * Called when the user launches the skill without specifying what they want.
- */
+// -- Called when the user launches the skill without specifying what they want --
 function onLaunch(launchRequest, session, callback) {
-    console.log("onLaunch requestId=" + launchRequest.requestId +
-        ", sessionId=" + session.sessionId);
-
-    // Dispatch to your skill's launch.
-    getWelcomeResponse(callback);
+    console.log("onLaunch requestId=" + launchRequest.requestId +", sessionId=" + session.sessionId);
+    getWelcomeResponse(callback); // Dispatch to your skill's launch
 }
 
-/**
- * Called when the user specifies an intent for this skill.
- */
+// -- Called when the user ends the session. Is not called when the skill returns shouldEndSession=true --
+function onSessionEnded(sessionEndedRequest, session) {
+    console.log("onSessionEnded requestId=" + sessionEndedRequest.requestId +", sessionId=" + session.sessionId);
+    // Add cleanup logic here if needed
+}
+
+// -- Called when the user specifies an intent for this skill --
 function onIntent(intentRequest, session, callback) {
-    console.log("onIntent requestId=" + intentRequest.requestId +
-        ", sessionId=" + session.sessionId);
+    console.log("onIntent requestId=" + intentRequest.requestId +", sessionId=" + session.sessionId);
 
     var intent = intentRequest.intent,
         intentName = intentRequest.intent.name;
@@ -318,18 +321,11 @@ function onIntent(intentRequest, session, callback) {
     }
 }
 
-/**
- * Called when the user ends the session.
- * Is not called when the skill returns shouldEndSession=true.
- */
-function onSessionEnded(sessionEndedRequest, session) {
-    console.log("onSessionEnded requestId=" + sessionEndedRequest.requestId +
-        ", sessionId=" + session.sessionId);
-    // Add cleanup logic here
-}
+// -----------------------------------------------
+// -- Functions to control the skill's behavior --
+// -----------------------------------------------
 
-// --------------- Functions that control the skill's behavior -----------------------
-
+// -- Will be called if skill is started without other commands --
 function getWelcomeResponse(callback) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var sessionAttributes = {};
@@ -337,14 +333,13 @@ function getWelcomeResponse(callback) {
     var speechOutput = skillResp.getWelcomeResponse[locale];
     // If the user either does not reply to the welcome message or says something that is not
     // understood, they will be prompted again with this text.
-    var repromptText = "Please tell me what I should do. You can start music by saying something like, " +
-        "Play preset 4 in the living room.";
+    var repromptText = skillResp.getWelcomeResponseRepromt[locale];
     var shouldEndSession = false;
 
-    callback(sessionAttributes,
-        buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
 }
 
+// -- Skips Back to previous song --
 function SkipBackIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -355,19 +350,15 @@ function SkipBackIntent(intent, session, callback) {
     var speechOutput = "";
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if there is a speaker slot
-        if (speakerSlot.value){
+        if (speakerSlot.value){ // check if there is a speaker slot
             var speaker = speakerSlot.value.toLowerCase();
             console.log('[ OK ] Speaker sent. Skipping back if valid and playing.');
 
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
-                    // is playing
-                    speechOutput = skillResp.SkipBackIntentSpeaker[locale].replace('${speaker}', speaker);;
+                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") { // is playing
+                    speechOutput = skillResp.SkipBackIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/prev_track';
@@ -377,64 +368,53 @@ function SkipBackIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
-
-                } else {
-                    // isnt playing
+                } else { // speaker isnt playing
                     console.log('[ OK ] Not playing, cannot skip. Exiting skill.');
                     speechOutput = skillResp.SkipBackIntentErrorSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                 }
 
-            } else {
-                // speaker not found
+            } else { // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
                 speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-
-
-        } else {
+        } else { // No speaker slot found
             console.log('[ OK ] No speaker sent. Investigating...');
             if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
                 console.log('[ OK ] Nothing is playing, cannot skip. Exiting skill.');
                 speechOutput = skillResp.SkipBackIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
+            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") { // Single playing speaker found
+                console.log('[ OK ] Single playing speaker found. Skipping back.');
                 speechOutput = skillResp.SkipBackIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                 + encodeURIComponent(userHomeState.speakers[userHomeState.zonesPlaying[0]].name) + '/key/prev_track';
-
                 console.log(commandURI);
                 http.get(commandURI, function(res) {
                     res.resume();
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-            } else {
+            } else { // Multiple speakers active
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
                 speechOutput = skillResp.SkipBackIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
             }
-
         }
-
     });
 }
 
+// -- Skips Forward to next song --
 function SkipForwardIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -445,19 +425,15 @@ function SkipForwardIntent(intent, session, callback) {
     var speechOutput = "";
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if there is a speaker slot
-        if (speakerSlot.value){
+        if (speakerSlot.value){ // check if there is a speaker slot
             var speaker = speakerSlot.value.toLowerCase();
             console.log('[ OK ] Speaker sent. Skipping forward if valid and playing.');
 
             if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
-                    // is playing
-                    speechOutput = skillResp.SkipForwardIntentSpeaker[locale].replace('${speaker}', speaker);;
+                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") { // speaker is playing
+                    speechOutput = skillResp.SkipForwardIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
                     + encodeURIComponent(userHomeState.speakers[speaker].name) + '/key/next_track';
@@ -467,37 +443,31 @@ function SkipForwardIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
 
-                } else {
-                    // isnt playing
+                } else { // speaker isnt playing
                     console.log('[ OK ] Not playing, cannot skip. Exiting skill.');
-                    speechOutput = skillResp.SkipForwardIntentErrorSpeaker[locale].replace('${speaker}', speaker);;
+                    speechOutput = skillResp.SkipForwardIntentErrorSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                 }
 
-            } else {
-                // speaker not found
+            } else { // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
                 speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-
-
-        } else {
+        } else { // No speaker specified
             console.log('[ OK ] No speaker sent. Investigating...');
-            if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
+            if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) { // No Speaker playing
                 console.log('[ OK ] Nothing is playing, cannot skip. Exiting skill.');
                 speechOutput = skillResp.SkipForwardIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
+            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") { // Found a single speaker playing
+                console.log('[ OK ] Single playing speaker found, skipping forward.');
                 speechOutput = skillResp.SkipForwardIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -508,22 +478,19 @@ function SkipForwardIntent(intent, session, callback) {
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-            } else {
+            } else { // Multiple speakers found
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
                 speechOutput = skillResp.SkipForwardIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
             }
-
         }
-
     });
 }
 
+// -- Changes Volume --
 function VolumeChangeIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -533,102 +500,79 @@ function VolumeChangeIntent(intent, session, callback) {
     var sessionAttributes = {};
     var shouldEndSession = false;
     var speechOutput = "";
-    var validVolumeChanges = ['up', 'down', 'louder', 'softer'];
+    var volumeChangeUp = ['up', 'louder', 'hoch', 'lauter', 'rauf', 'höher', 'mehr']; // ADD: more commands if changing the VOLUME_CHANGES slot type
+    var volumeChangeDown = ['down', 'softer', 'leiser', 'runter', 'weniger']; // ADD: more commands if changing the VOLUME_CHANGES slot type
+    var validVolumeChanges = volumeChangeUp.concat(volumeChangeDown); // All valid commands
     var volumeDelta = 10;
     var alexaID = session.user.userId;
 
-    if (!volumeChangeSlot.value) {
-        // did not get a volume change, so don't know what to do.
+    if (!volumeChangeSlot.value) { // did not get a volume change, so don't know what to do.
         console.log('[ WARN ] No VolumeChange. Exiting skill.');
         speechOutput = skillResp.VolumeChangeIntentErrorInput[locale];
         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-    } else if (validVolumeChanges.indexOf(volumeChangeSlot.value) < 0) {
-        // don't understand
+    } else if (validVolumeChanges.indexOf(volumeChangeSlot.value) < 0) { // don't understand
         console.log('[ WARN ] Invalid VolumeChange. Exiting skill.');
         speechOutput = skillResp.VolumeChangeIntentErrorInput[locale];
-
         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-    } else {
-        // good volume change value
-        /**
-         * NOTICE: you must escape speaker names before making them part of a request back to the server.
-         */
+    } else { // good volume change value
+        // NOTICE: you must escape speaker names before making them part of a request back to the server.
         getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-            // check if there is a speaker slot
-            if (speakerSlot.value){
+            if (speakerSlot.value){ // check if there is a speaker slot
                 var speaker = speakerSlot.value.toLowerCase();
                 console.log('[ OK ] Speaker sent. Checking if valid.');
 
-                if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                    // speaker is valid, so change the volume
+                if (userHomeState.speakers.hasOwnProperty(speaker)) { // speaker is valid, so change the volume
                     console.log('[ OK ] Speaker is valid. Changing volume.');
-                    if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder' || volumeChangeSlot.value == 'lauter' || volumeChangeSlot.value == 'hoch' || volumeChangeSlot.value == 'rauf' || volumeChangeSlot.value == 'höher' || volumeChangeSlot.value == 'mehr') { // CHANGE: Check if it's in the group of volumeUp
-                            // turn it up
-                            speechOutput = skillResp.VolumeChangeIntentUpSpeaker[locale].replace('${speaker}', speaker);
-                            shouldEndSession = true;
-                            var currentVolume = userHomeState.speakers[speaker].currentVolume;
-                            var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
-                            var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
-                            + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp;
+                    if (volumeChangeUp.indexOf(volumeChangeSlot.value) >= 0) { // turn it up
+                      speechOutput = skillResp.VolumeChangeIntentUpSpeaker[locale].replace('${speaker}', speaker);
+                      shouldEndSession = true;
+                      var currentVolume = userHomeState.speakers[speaker].currentVolume;
+                      var newVolumeUp = parseInt(currentVolume) + parseInt(volumeDelta);
+                      var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
+                      + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeUp;
 
-                            console.log(commandURI);
-                            http.get(commandURI, function(res) {
-                                res.resume();
-                                res.on('end', function(){
-                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                      console.log(commandURI);
+                      http.get(commandURI, function(res) {
+                          res.resume();
+                          res.on('end', function(){
+                              console.log('[ OK ] Request complete. Sending response to Alexa.');
+                              callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                          });
+                      });
+                    } else { // turn it down
+                      speechOutput = skillResp.VolumeChangeIntentDownSpeaker[locale].replace('${speaker}', speaker);
+                      shouldEndSession = true;
+                      var currentVolume = userHomeState.speakers[speaker].currentVolume;
+                      var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
+                      var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
+                      + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown;
 
-                                });
-                            });
+                      console.log(commandURI);
+                      http.get(commandURI, function(res) {
+                          res.resume();
+                          res.on('end', function(){
+                              console.log('[ OK ] Request complete. Sending response to Alexa.');
+                              callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+                          });
+                      });
+                  }
 
-
-                        } else {
-                            // turn it down
-                            speechOutput = skillResp.VolumeChangeIntentDownSpeaker[locale].replace('${speaker}', speaker);
-                            shouldEndSession = true;
-                            var currentVolume = userHomeState.speakers[speaker].currentVolume;
-                            var newVolumeDown = parseInt(currentVolume) - parseInt(volumeDelta);
-                            var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
-                            + encodeURIComponent(userHomeState.speakers[speaker].name) + '/volume/' + newVolumeDown;
-
-                            console.log(commandURI);
-                            http.get(commandURI, function(res) {
-                                res.resume();
-                                res.on('end', function(){
-                                    console.log('[ OK ] Request complete. Sending response to Alexa.');
-                                    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-                                });
-                            });
-
-                        }
-
-                } else {
-                    // speaker not foung
+                } else { // speaker not foung
                     console.log('[ WARN ] Speaker is not a vaild option.');
                     speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                 }
 
-            } else {
+            } else { // No speaker send
                 console.log('[ OK ] No speaker sent. Investigating...');
 
-                if (userHomeState.zonesPlaying.length == 1) {
-                    // there's no more than 1 zone playing
-
-                    if (userHomeState.speakers[userHomeState.zonesPlaying[0]].isMaster) {
-
-                        console.log('[ WARN ] Multiple are speakers active, none specified. Asking for clarification.');
+                if (userHomeState.zonesPlaying.length == 1) { // there's no more than 1 zone playing
+                    if (userHomeState.speakers[userHomeState.zonesPlaying[0]].isMaster) { // Multiple speakers are playing
+                        console.log('[ WARN ] Multiple speakers are active, none specified. Asking for clarification.');
                         speechOutput = skillResp.VolumeChangeIntentErrorMultipleSpeakers[locale];
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-                    } else {
-                        // just one speaker is playing - do the thing.
-                        if (volumeChangeSlot.value == 'up' || volumeChangeSlot.value == 'louder' || volumeChangeSlot.value == 'leiser' || volumeChangeSlot.value == 'runter' || volumeChangeSlot.value == 'weniger') { // CHANGE: Check if it's in the group of volumeDown
-                            // turn it up
+                    } else { // just one speaker is playing - do the thing.
+                        if (volumeChangeUp.indexOf(volumeChangeSlot.value) >= 0) { // turn it up
                             speechOutput = skillResp.VolumeChangeIntentUp[locale];
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
@@ -642,12 +586,9 @@ function VolumeChangeIntent(intent, session, callback) {
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
                                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                                 });
                             });
-
-                        } else {
-                            // turn it down
+                        } else { // turn it down
                             speechOutput = skillResp.VolumeChangeIntentDown[locale];
                             shouldEndSession = true;
                             var currentVolume = userHomeState.speakers[userHomeState.zonesPlaying[0]].currentVolume;
@@ -661,36 +602,27 @@ function VolumeChangeIntent(intent, session, callback) {
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
                                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                                 });
                             });
                         }
-
                     }
 
-                } else {
-                    // either nothing or multiple things are playing
+                } else { // either nothing or multiple things are playing
                     console.log('[ WARN ]  Either multiple or zero speakers active, none specified. Asking for clarification.');
                     speechOutput = skillResp.VolumeChangeIntentErrorMultipleSpeakers[locale];
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                 }
-
             }
-
         });
-
     }
-
-
 }
 
+// -- Plays a preset --
 function PlayPresetToSpeakerIntent(intent, session, callback) {
     var cardTitle = intent.name;
     var presetSlot = intent.slots.Preset;
     var preset = presetSlot.value;
     var speakerSlot = intent.slots.Speaker;
-
     var repromptText = "";
     var sessionAttributes = {};
     var shouldEndSession = false;
@@ -698,24 +630,15 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
     var availablePresets = ['1','2','3','4','5','6'];
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        if (presetSlot.value && speakerSlot.value) {
+        if (presetSlot.value && speakerSlot.value) { // something is in both slots, just need to verify what
             var speaker = speakerSlot.value.toLowerCase();
-            // something is in both slots, need to verify what
             console.log('[ OK ] Received both a preset slot and a speaker slot from Alexa.');
-            if (availablePresets.indexOf(preset) > -1) {
-
-                // preset is valid, check speaker
+            if (availablePresets.indexOf(preset) > -1) { // preset is valid, check speaker
                 console.log('[ OK ] Preset is a valid option.');
-
-                if (userHomeState.speakers.hasOwnProperty(speaker)) {
-
-                    // speaker is also valid, so play it!
+                if (userHomeState.speakers.hasOwnProperty(speaker)) { // speaker is also valid, so play it!
                     console.log('[ OK ] Speaker is a valid option, too. Sending play request.');
-
                     speechOutput = skillResp.PlayPresetToSpeakerIntent[locale].replace('${speaker}', speaker);
 
                     shouldEndSession = true;
@@ -728,45 +651,29 @@ function PlayPresetToSpeakerIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
 
-                } else {
-                    // speaker is not found, ask again
+                } else { // speaker is not found, ask again
                     console.log('[ FAIL ] Speaker is not a vaild option.');
                     speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                 }
-            } else {
-                // preset number is invalid, ask again
+            } else { // preset number is invalid, ask again
                 console.log('[ FAIL ] Preset is not a valid option.');
                 speechOutput = skillResp.PlayPresetToSpeakerIntentErrorWrongPreset[locale].replace('${preset}', preset);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-        } else {
-            // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
-            console.log('[ FAIL ] Did not receive both a preset slot and a speaker slot from Alexa.');
+        } else { // One of both slots (speaker or preset) is missing
+            console.log('[ FAIL ] Did not receive both a preset slot and a speaker slot from Alexa.'); // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
             speechOutput = skillResp.PlayPresetToSpeakerIntentErrorInput[locale];
             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
         }
     });
 }
 
-function exitSkill (callback) {
-    var cardTitle ="";
-    var sessionAttributes = {};
-    var speechOutput = "";
-    // If the user either does not reply to the welcome message or says something that is not
-    // understood, they will be prompted again with this text.
-    var repromptText = "";
-    var shouldEndSession = true;
-
-    callback(sessionAttributes,
-        buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-}
-
+// -- Combines speakers to zones --
 function ZonesIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -778,37 +685,29 @@ function ZonesIntent(intent, session, callback) {
     var shouldEndSession = false;
     var speechOutput = "";
     var alexaID = session.user.userId;
+    var actionValueAdd = ['add', 'verbinden', 'hinzufügen', 'füge']; // Valid values for adding speakers
+    var actionValueRemove = ['remove', 'entfernen', 'trennen']; // Valid values for removing speakers
+    var validActionValues = actionValueAdd.concat(actionValueRemove); // Valid values for all actions
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if all slots were received
-        if (actionSlot.hasOwnProperty('value') && masterSlot.hasOwnProperty('value') && slaveSlot.hasOwnProperty('value')) {
+        if (actionSlot.hasOwnProperty('value') && masterSlot.hasOwnProperty('value') && slaveSlot.hasOwnProperty('value')) { // all slots have a value
             var action = actionSlot.value.toLowerCase();
             var master = masterSlot.value.toLowerCase();
             var slave = slaveSlot.value.toLowerCase();
             console.log('[ OK ] Received an action and both a master slot and a slave slot from Alexa.');
 
-            // check master validity
-            if (userHomeState.speakers.hasOwnProperty(master) && userHomeState.zonesPlaying.indexOf(master) > -1) {
-
+            if (userHomeState.speakers.hasOwnProperty(master) && userHomeState.zonesPlaying.indexOf(master) > -1) { // Master is valid
                 console.log('[ OK ] Master is a valid option.');
 
-                // check slave validity
-                if (userHomeState.speakers.hasOwnProperty(slave)) {
-
+                if (userHomeState.speakers.hasOwnProperty(slave)) { // Slave is valid
                     console.log('[ OK ] Slave is a valid option, too.');
 
-                    // check action validity
-                    if(action == 'add' || action == 'verbinden' || action == 'hinzufügen' || action == 'füge') { // CHANGE: Add something like "in group: AddWords"
-
+                    if(actionValueAdd.indexOf(action) >= 0) { // Action is Add
                         console.log('[ OK ] Action is a valid option, too ("add"). Making grouping request');
 
-                        // is master actually a master, or not in a zone
-                        if (userHomeState.speakers[master].isMaster) {
+                        if (userHomeState.speakers[master].isMaster) { // is master actually a master, or not in a zone
 
-                            // is a master, so need to just add slave
                             speechOutput = skillResp.ZonesIntent[locale].replace('${slave}', slave).replace('${master}', master);
                             shouldEndSession = true;
                             var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -820,13 +719,10 @@ function ZonesIntent(intent, session, callback) {
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
                                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                                 });
                             });
 
-                        } else {
-
-                            // not a master, so need to make zone
+                        } else { // master is currently not a master, so need to make zone
                             speechOutput = skillResp.ZonesIntentCreate[locale].replace('${slave}', slave).replace('${master}', master);
                             shouldEndSession = true;
                             var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -838,12 +734,10 @@ function ZonesIntent(intent, session, callback) {
                                 res.on('end', function(){
                                     console.log('[ OK ] Request complete. Sending response to Alexa.');
                                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                                 });
                             });
                         }
-                    } else if (action == 'remove' || action == 'entfernen' || action == 'trennen') { // CHANGE: Add something like "in group: RemoveWords"
-
+                    } else if (actionValueRemove.indexOf(action) >= 0) { // Action is Remove
                         console.log('[ OK ] Action is a valid option, too ("remove"). Making grouping request');
 
                         speechOutput = skillResp.ZonesIntentRemove[locale].replace('${slave}', slave).replace('${master}', master);
@@ -857,39 +751,34 @@ function ZonesIntent(intent, session, callback) {
                             res.on('end', function(){
                                 console.log('[ OK ] Request complete. Sending response to Alexa.');
                                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                             });
                         });
-                    } else {
-                        // Action is not vaild, ask again
+                    } else { // Action is not vaild, ask again
                         console.log('[ FAIL ] Action is not a vaild option.');
-                        speechOutput = skillResp.ZonesIntentErrorInvalid[locale];;
+                        speechOutput = skillResp.ZonesIntentErrorInvalid[locale];
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                     }
 
-                } else {
-                    // slave is not found, ask again
+                } else { // slave is not found, ask again
                     console.log('[ FAIL ] Slave is not a vaild option.');
                     speechOutput = skillResp.ZonesIntentErrorSlave[locale].replace('${slave}', slave);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
                 }
-            } else {
-                // master is not found, ask again
+            } else { // master is not found, ask again
                 console.log('[ FAIL ] Master is not a valid option.');
                     speechOutput = skillResp.ZonesIntentErrorMaster[locale].replace('${master}', master);
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-        } else {
-            // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
-            console.log('[ FAIL ] Did not receive all parts from Alexa.');
-            speechOutput = skillResp.ZonesIntentErrorInput[locale];;
+        } else { // Did not revieve all slots (action, master, slave)
+            console.log('[ FAIL ] Did not receive all parts from Alexa.'); // in future will more gracefully handle only one piece of data present. for now just ask the user for the whole thing again.
+            speechOutput = skillResp.ZonesIntentErrorInput[locale];
             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
         }
-
     });
 }
 
+// -- Pauses playback --
 function PauseIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -900,18 +789,15 @@ function PauseIntent(intent, session, callback) {
     var speechOutput = "";
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if there is a speaker slot
-        if (speakerSlot.value){
+        if (speakerSlot.value){ // check if there is a speaker slot
             var speaker = speakerSlot.value.toLowerCase();
             console.log('[ OK ] Speaker sent. Pausing if valid and playing.');
 
-            if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
-                    // is playing
+            if (userHomeState.speakers.hasOwnProperty(speaker)) { // A speaker is active
+                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") { // is playing
+                    console.log('[ OK ] Speaker is valid and playing. Pausing.');
                     speechOutput = skillResp.PauseIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                      var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -923,35 +809,31 @@ function PauseIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
 
-                } else {
-                    // isnt playing
+                } else { // speaker isnt playing
                     console.log('[ OK ] Not playing, cannot pause. Exiting skill.');
                     speechOutput = skillResp.PauseIntentErrorSpeakerPlayback[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                 }
 
-            } else {
-                // speaker not found
+            } else { // speaker not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
                 speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-        } else {
+        } else { // No speaker sent
             console.log('[ OK ] No speaker sent. Investigating...');
-            if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) {
+            if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE")) { // No speaker is currently playing
                 console.log('[ OK ] Nothing is playing, cannot pause. Exiting skill.');
                 speechOutput = skillResp.PauseIntentErrorPlayback[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") {
+            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") { // A speaker is currently playing
+                console.log('[ OK ] A speaker is playing, will pause.');
                 speechOutput = skillResp.PauseIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -963,22 +845,19 @@ function PauseIntent(intent, session, callback) {
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-            } else {
+            } else { // Multiple speakers are active
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
                 speechOutput =
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
             }
-
         }
-
     });
 }
 
+// -- Starts playback --
 function PlayIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -989,17 +868,14 @@ function PlayIntent(intent, session, callback) {
     var speechOutput = "";
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if there is a speaker slot
-        if (speakerSlot.value){
+        if (speakerSlot.value){ // check if there is a speaker slot
             var speaker = speakerSlot.value.toLowerCase();
             console.log('[ OK ] Speaker sent. Playing if valid and paused.');
-            if (userHomeState.speakers.hasOwnProperty(speaker)) {
-                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PAUSE_STATE") {
-                    // is paused
+            if (userHomeState.speakers.hasOwnProperty(speaker)) { // Check if the speaker is active
+                if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PAUSE_STATE") { // the speaker is paused
+                    console.log('[ OK ] Speaker is paused. Playing.');
                     speechOutput = skillResp.PlayIntentSpeakerResume[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -1011,19 +887,16 @@ function PlayIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
 
-                } else if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") {
-                    // isnt playing
-                    console.log('[ OK ] Already playing, cannot play...more. Exiting skill.');
+                } else if (userHomeState.speakers[speaker].nowPlaying && userHomeState.speakers[speaker].nowPlaying.playStatus == "PLAY_STATE") { // speaker is already playing
+                    console.log('[ OK ] Already playing, cannot play more. Exiting skill.');
                     speechOutput = skillResp.PlayIntentErrorSpeakerPlaying[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-                } else {
-                    // is off
+                } else { // speaker is off
+                    console.log('[ OK ] Speaker is off. Playing.');
                     speechOutput = skillResp.PlayIntentSpeaker[locale].replace('${speaker}', speaker);
                     shouldEndSession = true;
                     var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -1035,32 +908,30 @@ function PlayIntent(intent, session, callback) {
                         res.on('end', function(){
                             console.log('[ OK ] Request complete. Sending response to Alexa.');
                             callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                         });
                     });
-
                 }
 
-            } else {
-                // speaker not found
+            } else { // speaker is not found
                 console.log('[ WARN ] Speaker is not a vaild option.');
                 speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-
-
-        } else {
+        } else { // No speaker sent
             console.log('[ OK ] No speaker sent. Investigating...');
-            console.log(userHomeState.zonesPlaying.length);
-            console.log(userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus);
-            if (userHomeState.zonesPlaying.length <= 0 || (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE")) {
-                console.log('[ OK ] Anything that is on is already playing.');
-                speechOutput = skillResp.PlayIntentErrorEverythingPlaying[locale];;
+            if (userHomeState.zonesPlaying.length <= 0) { // No playing or paused speakers found
+                console.log('[ OK ] No active or paused speakers found to start playing.');
+                speechOutput = skillResp.PlayIntentErrorNothingActive[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE") {
+            }else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PLAY_STATE") { // Anything that is on, is playing
+                console.log('[ OK ] Anything that is on is already playing.');
+                speechOutput = skillResp.PlayIntentErrorEverythingPlaying[locale];
+                shouldEndSession = true;
+                callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+            } else if (userHomeState.zonesPlaying.length == 1 && userHomeState.speakers[userHomeState.zonesPlaying[0]].nowPlaying.playStatus == "PAUSE_STATE") { // A paused speaker found
+                console.log('[ OK ] Paused speaker found. Playing.');
                 speechOutput = skillResp.PlayIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -1072,22 +943,19 @@ function PlayIntent(intent, session, callback) {
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-            } else {
+            } else { // Multiple speakers found
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
                 speechOutput = skillResp.PlayIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
             }
-
         }
-
     });
 }
 
+// -- Powers off --
 function PowerOffIntent(intent, session, callback) {
     console.log("Intents received: ",intent.slots);
     var cardTitle = intent.name;
@@ -1098,16 +966,13 @@ function PowerOffIntent(intent, session, callback) {
     var speechOutput = "";
     var alexaID = session.user.userId;
 
-    /**
-     * NOTICE: you must escape speaker names before making them part of a request back to the server.
-     */
+    // NOTICE: you must escape speaker names before making them part of a request back to the server.
     getBoseHomeState(callback, alexaID, function(userHomeState, bridgeID) {
-        // check if there is a speaker slot
-        if (speakerSlot.value){
+        if (speakerSlot.value){ // check if there is a speaker slot
             var speaker = speakerSlot.value.toLowerCase();
             console.log('[ OK ] Speaker sent. Turning off.');
 
-            if (userHomeState.speakers.hasOwnProperty(speaker)) {
+            if (userHomeState.speakers.hasOwnProperty(speaker)) { // Speaker is correct
                 speechOutput = skillResp.PowerOffIntentSpeaker[locale].replace('${speaker}', speaker);
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -1119,27 +984,23 @@ function PowerOffIntent(intent, session, callback) {
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-
-            } else {
-                // speaker not found
+            } else { // speaker is wrong
                 console.log('[ WARN ] Speaker is not a vaild option.');
                 speechOutput = skillResp.SpeakerNotFoundError[locale].replace('${speaker}', speaker);
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
             }
 
-        } else {
+        } else { // No speaker sent
             console.log('[ OK ] No speaker sent. Investigating...');
-            if (userHomeState.zonesPlaying.length <= 0) {
+            if (userHomeState.zonesPlaying.length <= 0) { // No speakers are active
                 console.log('[ OK ] Nothing is on. Exiting skill.');
                 speechOutput = skillResp.PowerOffIntentErrorNotPlaying[locale];
                 shouldEndSession = true;
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
-            } else if (userHomeState.zonesPlaying.length == 1) {
+            } else if (userHomeState.zonesPlaying.length == 1) { // one speaker is active
                 speechOutput = skillResp.PowerOffIntent[locale];
                 shouldEndSession = true;
                 var commandURI = bridgeBasePath + '/api/homes/pushKey?bridgeID=' + bridgeID + '&url=/'
@@ -1151,24 +1012,36 @@ function PowerOffIntent(intent, session, callback) {
                     res.on('end', function(){
                         console.log('[ OK ] Request complete. Sending response to Alexa.');
                         callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
                     });
                 });
 
-            } else {
+            } else { // Multiple speakers are active
                 console.log('[ WARN ] Multiple speakers active, none specified. Asking for clarification.');
                 speechOutput = skillResp.PowerOffIntentErrorMultipleSpeakers[locale];
                 callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
-
             }
-
         }
-
     });
 }
 
-// --------------- Helper that gets info about the state of the user's home -----------------------
+// -- Exits the alexa skill --
+function exitSkill (callback) {
+    var cardTitle ="";
+    var sessionAttributes = {};
+    var speechOutput = "";
+    // If the user either does not reply to the welcome message or says something that is not
+    // understood, they will be prompted again with this text.
+    var repromptText = "";
+    var shouldEndSession = true;
 
+    callback(sessionAttributes, buildSpeechletResponse(cardTitle, speechOutput, repromptText, shouldEndSession));
+}
+
+// ----------------------
+// -- Helper functions --
+// ----------------------
+
+// -- Helper that gets info about the state of the user's home --
 function getBoseHomeState(callback, alexaID, boseCallback) {
     http.get(bridgeBasePath + '/api/homes/' + alexaID, function(res) {
         var homeStateBody = '';
@@ -1220,8 +1093,7 @@ function getBoseHomeState(callback, alexaID, boseCallback) {
     });
 }
 
-// --------------- Helpers that build all of the responses -----------------------
-
+// -- Helpers that build all of the responses --
 function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
     return {
         outputSpeech: {
@@ -1243,6 +1115,7 @@ function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
     };
 }
 
+// -- Helpers that build all of the responses --
 function buildResponse(sessionAttributes, speechletResponse) {
     return {
         version: "1.0",
